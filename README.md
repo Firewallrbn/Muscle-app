@@ -4,7 +4,7 @@ Aplicación móvil para gimnasio desarrollada con React Native y Supabase.
 Diseñada para ofrecer una experiencia moderna, motivante y personalizada para los usuarios que desean optimizar su entrenamiento y progreso físico.
 
 🔗 Diseño en Figma:
-👉 Ver prototipo interactivo
+👉 [Ver prototipo interactivo](https://www.figma.com/design/6pzZINx7GDpkEqFhjb7CHO/MUSCLE-APP?node-id=59-1434&t=moXK6gtUg0xBB6Yd-0)
 
 🚀 Características principales
 
