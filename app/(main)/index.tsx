@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-export default function ProfileScreen() {
+export default function RoutinesScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Perfil</Text>
-      <Text style={styles.subtitle}>Gestiona tu información personal.</Text>
+      <Text style={styles.title}>Routines</Text>
+      <Text style={styles.subtitle}>Crea y gestiona tus rutinas.</Text>
     </View>
   );
 }
@@ -29,3 +29,4 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
 });
+
