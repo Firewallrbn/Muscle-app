@@ -106,13 +106,16 @@ export const AuthProvider = ({ children }: any) => {
                 .from("profiles")
                 .insert([
                   {
-                    id: user.id, // El mismo id que en auth.users
+                    id: user.id, 
                     email: user.email,
-                    name: "", // Puedes poner valores por defecto o vacíos
                     username: username,
-                    bio: "",
-                    phone: "",
-                    gender: "",
+                    age: null,
+                    height: null,
+                    weight: null,
+                    weight_goal: null,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                    ROL: 'USER'
                   },
                 ]);
               if (profileError) {
