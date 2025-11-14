@@ -1,5 +1,5 @@
 import { supabase } from "@/utils/Supabase";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 
 
 interface AuthContextProps {
@@ -132,6 +132,61 @@ export const AuthProvider = ({ children }: any) => {
     const logout = async () => {
         setUser(null);
     }
+
+    useEffect(() => {
+    // Al montar, intenta obtener el usuario autenticado y cargar su profile
+    const init = async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        const authUser = data?.user ?? null;
+        if (authUser) {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', authUser.id)
+            .single();
+          if (!profileError && profileData) {
+            setUser(profileData);
+          } else {
+            setUser({
+              id: authUser.id,
+              email: authUser.email,
+              name: authUser.user_metadata?.name ?? authUser.email?.split('@')[0]
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Init auth error', e);
+      }
+    };
+
+    init();
+
+    // Suscribirse a cambios de sesión (login/logout)
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const authUser = session?.user ?? null;
+      if (!authUser) {
+        setUser(null);
+        return;
+      }
+      try {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authUser.id)
+          .single();
+        if (!profileError && profileData) setUser(profileData);
+        else setUser({ id: authUser.id, email: authUser.email });
+      } catch (err) {
+        console.error('Auth state change error', err);
+      }
+    });
+
+    return () => {
+      // cleanup
+      listener?.subscription?.unsubscribe?.();
+    };
+  }, []);
 
     return <AuthContext.Provider
         value={{
