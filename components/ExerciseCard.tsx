@@ -1,15 +1,29 @@
 import { Exercise } from '@/types';
-import React from 'react';
+import React, { useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
+
+const placeholderImage = require('../assets/images/icon.png');
 
 interface ExerciseCardProps {
     exercise: Exercise;
 }
 
 const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
+        const [usePlaceholder, setUsePlaceholder] = useState(!exercise.imageUrl);
     return (
         <View style={styles.card}>
-            <Image source={{ uri: exercise.gifUrl }} style={styles.thumbnail} resizeMode="cover" />
+            <Image
+                source={
+                    usePlaceholder
+                        ? placeholderImage
+                        : {
+                              uri: exercise.imageUrl,
+                          }
+                }
+                style={styles.thumbnail}
+                resizeMode="cover"
+                onError={() => setUsePlaceholder(true)}
+            />
             <View style={styles.content}>
                 <Text style={styles.title}>{exercise.name}</Text>
                 <View style={styles.metaRow}>

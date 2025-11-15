@@ -104,10 +104,15 @@ export const ExerciseProvider = ({ children }: { children: ReactNode }) => {
 
             const data = (await response.json()) as ApiExercise[];
 
-            const exercisesWithImages = data.map((exercise) => ({
-                ...exercise,
+            const exercisesWithImages: Exercise[] = data.map((exercise) => ({
                 id: exercise.id.toString(),
+                name: exercise.name ?? 'Unknown exercise',
+                bodyPart: exercise.bodyPart ?? 'Unknown body part',
+                equipment: exercise.equipment ?? 'Unknown equipment',
+                target: exercise.target ?? 'Unknown target',
                 imageUrl: buildExerciseImageUrl(exercise.id, resolution),
+                description: exercise.description ?? 'No description available',
+                muscleGroup: exercise.muscleGroup ?? 'Unknown muscle group',
             }));
 
             if (isMountedRef.current) {
