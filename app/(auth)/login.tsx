@@ -15,8 +15,10 @@ export default function Index() {
     const success = await context.login(cleanEmail, cleanPassword);
     if (success) {
         router.replace("/(main)/exercises");
+        console.log("Login exitoso");
     } else {
       alert("Error al iniciar sesión. Revisa tus credenciales.");
+      console.log("Error al iniciar sesión");
     }
   };
 

@@ -15,12 +15,27 @@ interface ExerciseContextValue {
     loading: boolean;
     error: string | null;
     fetchBodyParts: () => Promise<void>;
-    fetchAllExercises: () => Promise<void>;
+    fetchAllExercises: (resolution?: number) => Promise<void>;
 }
+
+type ApiExercise = Partial<Exercise> & {
+    id: string;
+    gifUrl?: string;
+    imageUrl?: string;
+};
+
 
 const ExerciseContext = createContext<ExerciseContextValue | undefined>(undefined);
 
 const API_BASE_URL = 'https://exercisedb.p.rapidapi.com';
+const DEFAULT_IMAGE_RESOLUTION = 360;
+
+type ExerciseApiResponse = Omit<Exercise, 'imageUrl'> & { id: string | number };
+
+const buildExerciseImageUrl = (id: string | number, resolution: number = DEFAULT_IMAGE_RESOLUTION) => {
+    const paddedId = id.toString().padStart(4, '0');
+    return `https://cdn.exercisedb.io/exercises/${paddedId}/${resolution}.gif`;
+};
 
 const getApiKey = () => {
     const apiKey = process.env.EXPO_PUBLIC_RAPIDAPI_KEY;
@@ -74,7 +89,7 @@ export const ExerciseProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [handleError]);
 
-    const fetchAllExercises = useCallback(async () => {
+    const fetchAllExercises = useCallback(async (resolution: number = DEFAULT_IMAGE_RESOLUTION) => {
         try {
             const response = await fetch(`${API_BASE_URL}/exercises`, {
                 headers: {
@@ -87,10 +102,12 @@ export const ExerciseProvider = ({ children }: { children: ReactNode }) => {
                 throw new Error('Failed to fetch exercises.');
             }
 
-            const data = (await response.json()) as Exercise[];
+            const data = (await response.json()) as ApiExercise[];
+
             const exercisesWithImages = data.map((exercise) => ({
                 ...exercise,
-                imageUrl: exercise.gifUrl,
+                id: exercise.id.toString(),
+                imageUrl: buildExerciseImageUrl(exercise.id, resolution),
             }));
 
             if (isMountedRef.current) {
@@ -98,7 +115,6 @@ export const ExerciseProvider = ({ children }: { children: ReactNode }) => {
             }
         } catch (err) {
             handleError(err);
-            throw err;
         }
     }, [handleError]);
 
