@@ -1,9 +1,11 @@
 export interface Exercise {
-  id: string;
-  name: string;
-  description?: string;
-  muscleGroup?: string;
-  equipment?: string;
-  [key: string]: any;
+    id: string;
+    name: string;
+    bodyPart: string;
+    target: string;
+    equipment: string;
+    gifUrl: string;
+    secondaryMuscles?: string[];
+    instructions?: string[];
+    imageUrl?: string;
 }
-

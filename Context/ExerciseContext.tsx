@@ -88,9 +88,13 @@ export const ExerciseProvider = ({ children }: { children: ReactNode }) => {
             }
 
             const data = (await response.json()) as Exercise[];
+            const exercisesWithImages = data.map((exercise) => ({
+                ...exercise,
+                imageUrl: exercise.gifUrl,
+            }));
 
             if (isMountedRef.current) {
-                setExercises(data);
+                setExercises(exercisesWithImages);
             }
         } catch (err) {
             handleError(err);
