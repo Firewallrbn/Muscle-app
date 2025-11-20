@@ -18,6 +18,8 @@ export default function Index() {
         console.log("Login exitoso");
     } else {
       alert("Error al iniciar sesión. Revisa tus credenciales.");
+      console.log("No sirve");
+      
     }
   };
 

@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-export default function ProfileScreen() {
+export default function MuscleScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Perfil</Text>
-      <Text style={styles.subtitle}>Gestiona tu información personal.</Text>
+      <Text style={styles.title}>Muscle</Text>
+      <Text style={styles.subtitle}>Explora tu perfil.</Text>
     </View>
   );
 }

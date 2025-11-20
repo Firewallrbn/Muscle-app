@@ -1,3 +1,4 @@
+import Camera from '@/components/Camera';
 import CategoryChip from '@/components/CategoryChip';
 import ExerciseCard from '@/components/ExerciseCard';
 import { useExerciseContext } from '@/Context/ExerciseContext';
@@ -133,6 +134,7 @@ const ExercisesScreen: React.FC = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <Camera></Camera>
             <FlatList
                 data={displayedExercises}
                 keyExtractor={keyExtractor}
@@ -157,9 +159,9 @@ const ExercisesScreen: React.FC = () => {
 };
 
 
-
 const styles = StyleSheet.create({
-  safeArea: {
+
+    safeArea: {
         flex: 1,
         backgroundColor: '#F8F9FB',
     },
@@ -196,7 +198,7 @@ const styles = StyleSheet.create({
     },
     searchInput: {
         fontSize: 16,
-                color: '#1C1C1E',
+        color: '#1C1C1E',
     },
     categoriesContainer: {
         marginTop: 20,
@@ -216,7 +218,7 @@ const styles = StyleSheet.create({
         color: '#D93025',
         textAlign: 'center',
     },
-        footerSpacing: {
+    footerSpacing: {
         height: 32,
     },
     emptyState: {

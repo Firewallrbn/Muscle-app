@@ -20,42 +20,53 @@ export const AuthProvider = ({ children }: any) => {
     const [isLoading, setIsLoading] = useState(false);
 
    const login = async (email: string, password: string) => {
+        setIsLoading(true);
         try {
-            // Authenticate with Supabase Auth
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            console.log("Entró - login start", { email });
 
+            // Llamada a Supabase
+            const res = await supabase.auth.signInWithPassword({ email, password });
+            console.log("signInWithPassword response:", res);
+
+            const { data, error } = res;
             if (error) {
-                console.error('Login error:', error.message);
+                console.error('Login error (supabase):', error);
+                setIsLoading(false);
                 return false;
             }
 
-            if (data.user) {
-                // Fetch complete user profile from profiles table
-                const { data: profileData, error: profileError } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', data.user.id)
-                    .single();
-
-                if (profileError) {
-                    console.error('Profile fetch error:', profileError.message);
-                    // Fallback: use basic auth data if profile fetch fails
-                    setUser({
-                        id: data.user.id,
-                        email: data.user.email!,
-                        name: data.user.user_metadata.name || data.user.email!.split('@')[0]
-                    });
-                } else {
-                    // Set complete profile data
-                    setUser(profileData);
-                }
-
-                return true;
+            if (!data?.user) {
+                console.error('Login error: no user returned', data);
+                setIsLoading(false);
+                return false;
             }
 
-            return false;
-        } catch (error) {
-            console.error('Login error:', error);
+            console.log("Login correcto, obteniendo perfil", { userId: data.user.id });
+
+            // Fetch profile desde 'profiles' por id = auth user id
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', data.user.id)
+                .single();
+
+            if (profileError) {
+                console.warn('Profile fetch error:', profileError);
+                // fallback mínimo: usar datos de auth
+                setUser({
+                    id: data.user.id,
+                    email: data.user.email,
+                    name: (data.user.user_metadata as any)?.name ?? data.user.email?.split('@')[0]
+                });
+            } else {
+                setUser(profileData);
+            }
+
+            setIsLoading(false);
+            return true;
+        } catch (err) {
+            console.error('Login exception:', err);
+            setIsLoading(false);
             return false;
         }
     }

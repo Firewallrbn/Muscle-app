@@ -79,7 +79,7 @@ export const ExerciseProvider = ({ children }: { children: ReactNode }) => {
             }
 
             const data = (await response.json()) as string[];
-
+            console.log('Fetched body parts:', data);
             if (isMountedRef.current) {
                 setBodyParts(data);
             }
