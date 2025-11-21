@@ -9,7 +9,7 @@ interface ExerciseCardProps {
 }
 
 const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
-        const [usePlaceholder, setUsePlaceholder] = useState(!exercise.imageUrl);
+    const [usePlaceholder, setUsePlaceholder] = useState(!exercise.imageUrl);
     return (
         <View style={styles.card}>
             <Image
@@ -17,8 +17,8 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
                     usePlaceholder
                         ? placeholderImage
                         : {
-                              uri: exercise.imageUrl,
-                          }
+                            uri: exercise.imageUrl,
+                        }
                 }
                 style={styles.thumbnail}
                 resizeMode="cover"

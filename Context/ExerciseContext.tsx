@@ -33,8 +33,9 @@ const DEFAULT_IMAGE_RESOLUTION = 360;
 type ExerciseApiResponse = Omit<Exercise, 'imageUrl'> & { id: string | number };
 
 const buildExerciseImageUrl = (id: string | number, resolution: number = DEFAULT_IMAGE_RESOLUTION) => {
+    const apiKey = process.env.EXPO_PUBLIC_RAPIDAPI_KEY;
     const paddedId = id.toString().padStart(4, '0');
-    return `https://cdn.exercisedb.io/exercises/${paddedId}/${resolution}.gif`;
+    return `https://exercisedb.p.rapidapi.com/image?exerciseId=${paddedId}&resolution=${resolution}&rapidapi-key=${apiKey}`;
 };
 
 const getApiKey = () => {
@@ -136,9 +137,6 @@ export const ExerciseProvider = ({ children }: { children: ReactNode }) => {
             try {
                 await Promise.all([fetchBodyParts(), fetchAllExercises()]);
             } catch (err) {
-                if (!isActive) {
-                    return;
-                }
                 // Error already handled in fetch functions
             } finally {
                 if (isMountedRef.current) {
