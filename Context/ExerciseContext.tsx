@@ -113,7 +113,7 @@ export const ExerciseProvider = ({ children }: { children: ReactNode }) => {
                 target: exercise.target ?? 'Unknown target',
                 imageUrl: buildExerciseImageUrl(exercise.id, resolution),
                 description: exercise.description ?? 'No description available',
-                muscleGroup: exercise.muscleGroup ?? 'Unknown muscle group',
+                muscle_group: exercise.muscle_group ?? exercise.target ?? 'Unknown muscle group',
             }));
 
             if (isMountedRef.current) {
