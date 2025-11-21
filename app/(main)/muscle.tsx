@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
+import { useRouter } from 'expo-router';
 
 const TRAINING_TYPES: { key: string; label: string; color: string }[] = [
   { key: 'pierna', label: 'Pierna', color: '#FF6B6B' },
@@ -14,12 +15,16 @@ const TRAINING_TYPES: { key: string; label: string; color: string }[] = [
 
 const STORAGE_KEY = '@muscle_training_data';
 
+const dateToString = (date: Date) => {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 const getTodayDateString = () => {
   const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
+  return dateToString(d);
 };
 
 const WEEKDAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -38,10 +43,97 @@ const getWeekdayName = (dateString: string) => {
   return WEEKDAY_NAMES[d.getDay()] || dateString;
 };
 
+const parseDateString = (dateString: string) => {
+  const [year, month, day] = dateString.split('-').map(Number);
+  const parsed = new Date(year, month - 1, day);
+  parsed.setHours(0, 0, 0, 0);
+  return parsed;
+};
+
+const calculateCurrentStreak = (map: Record<string, string>) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const dates = new Set(Object.keys(map));
+  let streak = 0;
+  const cursor = new Date(today);
+
+  while (dates.has(dateToString(cursor))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return streak;
+};
+
+const calculateBestStreak = (map: Record<string, string>) => {
+  const dates = Object.keys(map).sort();
+  if (dates.length === 0) return 0;
+
+  let best = 1;
+  let current = 1;
+
+  for (let i = 1; i < dates.length; i++) {
+    const prev = parseDateString(dates[i - 1]);
+    const currentDate = parseDateString(dates[i]);
+    const diffDays = (currentDate.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (diffDays === 1) {
+      current += 1;
+    } else {
+      current = 1;
+    }
+
+    if (current > best) best = current;
+  }
+
+  return best;
+};
+
+const countDaysThisMonth = (map: Record<string, string>) => {
+  const today = new Date();
+  const month = today.getMonth();
+  const year = today.getFullYear();
+
+  return Object.keys(map).filter((date) => {
+    const parsed = parseDateString(date);
+    return parsed.getMonth() === month && parsed.getFullYear() === year;
+  }).length;
+};
+
+const getStartOfWeek = (date: Date) => {
+  const start = new Date(date);
+  const day = start.getDay();
+  const diff = (day + 6) % 7; // Lunes como inicio de semana
+  start.setDate(start.getDate() - diff);
+  start.setHours(0, 0, 0, 0);
+  return start;
+};
+
+const buildWeeklySummary = (map: Record<string, string>) => {
+  const summary = TRAINING_TYPES.reduce((acc, type) => {
+    acc[type.key] = 0;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const start = getStartOfWeek(new Date());
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+
+  Object.entries(map).forEach(([date, typeKey]) => {
+    const parsed = parseDateString(date);
+    if (parsed >= start && parsed <= end) {
+      summary[typeKey] = (summary[typeKey] || 0) + 1;
+    }
+  });
+
+  return summary;
+};
+
 export default function MuscleScreen() {
   const [dateTypeMap, setDateTypeMap] = useState<Record<string, string>>({});
   const [selectedType, setSelectedType] = useState<string | null>('pierna');
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   // Cargar datos al iniciar
   useEffect(() => {
@@ -158,12 +250,32 @@ export default function MuscleScreen() {
     .filter((d) => isWithinNext7Days(d))
     .sort((a, b) => a.localeCompare(b)); // ascendente
 
+  const currentStreak = calculateCurrentStreak(dateTypeMap);
+  const bestStreak = calculateBestStreak(dateTypeMap);
+  const daysThisMonth = countDaysThisMonth(dateTypeMap);
+  const weeklySummary = buildWeeklySummary(dateTypeMap);
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <Text style={styles.title}>Muscle</Text>
       <Text style={styles.subtitle}>
         Selecciona un tipo y toca un día para anotarlo. Toca otra vez para borrar.
       </Text>
+
+      <View style={styles.statsRow}>
+        <View style={styles.statCard}>
+          <Text style={styles.statLabel}>Racha actual</Text>
+          <Text style={styles.statValue}>{currentStreak} días</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statLabel}>Mejor racha</Text>
+          <Text style={styles.statValue}>{bestStreak} días</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statLabel}>Este mes</Text>
+          <Text style={styles.statValue}>{daysThisMonth} días</Text>
+        </View>
+      </View>
 
       <View style={styles.legendContainer}>
         <ScrollView horizontal contentContainerStyle={styles.legendScroll} showsHorizontalScrollIndicator={false}>
@@ -171,23 +283,20 @@ export default function MuscleScreen() {
             const selected = selectedType === t.key;
             return (
               <TouchableOpacity
-                activeOpacity={0.7} // Esto hace que la animación de opacidad sea más rápida
+                activeOpacity={0.7}
                 key={t.key}
                 style={[
-                  styles.typeButton, 
-                  selected && styles.typeButtonSelected, 
-                  { 
+                  styles.typeButton,
+                  selected && styles.typeButtonSelected,
+                  {
                     borderColor: t.color,
-                    backgroundColor: selected ? t.color + '20' : '#fff' // Fondo semitransparente cuando está seleccionado
-                  }
+                    backgroundColor: selected ? t.color + '20' : '#fff',
+                  },
                 ]}
                 onPress={() => setSelectedType(t.key)}
               >
                 <View style={[styles.colorDot, { backgroundColor: t.color }]} />
-                <Text style={[
-                  styles.typeLabel,
-                  selected && styles.typeLabelSelected // Texto más oscuro cuando está seleccionado
-                ]}>
+                <Text style={[styles.typeLabel, selected && styles.typeLabelSelected]}>
                   {t.label}
                 </Text>
               </TouchableOpacity>
@@ -196,66 +305,83 @@ export default function MuscleScreen() {
         </ScrollView>
       </View>
 
-      <Calendar
-        markingType={'custom'}
-        markedDates={buildMarkedDates(dateTypeMap)}
-        onDayPress={onDayPress}
-        theme={{
-          todayTextColor: '#222',
-        }}
-        style={styles.calendar}
-      />
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Calendario de entrenamientos</Text>
+        <Calendar
+          markingType={'custom'}
+          markedDates={buildMarkedDates(dateTypeMap)}
+          onDayPress={onDayPress}
+          theme={{
+            todayTextColor: '#222',
+          }}
+          style={styles.calendar}
+        />
+        <Text style={styles.helperText}>Los días coloreados son entrenamientos registrados.</Text>
+      </View>
 
-      {/* Lista en la parte de abajo: próximos 7 días */}
-      <View style={styles.listContainer}>
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Resumen semanal</Text>
+        {TRAINING_TYPES.map((type) => (
+          <View key={type.key} style={styles.weeklyRow}>
+            <View style={styles.listInfo}>
+              <View style={[styles.colorDot, { backgroundColor: type.color }]} />
+              <Text style={styles.listType}>{type.label}</Text>
+            </View>
+            <Text style={styles.weeklyCount}>{weeklySummary[type.key]} vez(es)</Text>
+          </View>
+        ))}
+      </View>
+
+      <View style={styles.card}>
         <Text style={styles.listTitle}>Entrenamientos próximos 7 días</Text>
-        <ScrollView style={styles.listScroll}>
-          {upcomingDates.length === 0 ? (
-            <Text style={styles.emptyText}>No hay entrenamientos en los próximos 7 días.</Text>
-          ) : (
-            upcomingDates.map((date) => {
-              const typeKey = dateTypeMap[date];
-              const type = TRAINING_TYPES.find((t) => t.key === typeKey);
-              return (
-                <View key={date} style={styles.listItem}>
-                  <View style={styles.listInfo}>
-                    <View style={[styles.colorDot, { backgroundColor: type?.color || '#999' }]} />
-                    <View>
-                      <Text style={styles.listDate}>{getWeekdayName(date)}</Text>
-                      <Text style={styles.listType}>{type?.label || typeKey}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.listActions}>
-                    <TouchableOpacity 
-                      style={styles.actionButton} 
-                      onPress={() => changeTypeForDate(date)}
-                    >
-                      <Text style={styles.actionText}>Cambiar</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                      style={[styles.actionButton, styles.deleteButton]} 
-                      onPress={() => deleteDate(date)}
-                    >
-                      <Text style={[styles.actionText, { color: '#fff' }]}>Borrar</Text>
-                    </TouchableOpacity>
+        {upcomingDates.length === 0 ? (
+          <Text style={styles.emptyText}>No hay entrenamientos en los próximos 7 días.</Text>
+        ) : (
+          upcomingDates.map((date) => {
+            const typeKey = dateTypeMap[date];
+            const type = TRAINING_TYPES.find((t) => t.key === typeKey);
+            return (
+              <View key={date} style={styles.listItem}>
+                <View style={styles.listInfo}>
+                  <View style={[styles.colorDot, { backgroundColor: type?.color || '#999' }]} />
+                  <View>
+                    <Text style={styles.listDate}>{getWeekdayName(date)}</Text>
+                    <Text style={styles.listType}>{type?.label || typeKey}</Text>
                   </View>
                 </View>
-              );
-            })
-          )}
-        </ScrollView>
+                <View style={styles.listActions}>
+                  <TouchableOpacity style={styles.actionButton} onPress={() => changeTypeForDate(date)}>
+                    <Text style={styles.actionText}>Cambiar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.deleteButton]}
+                    onPress={() => deleteDate(date)}
+                  >
+                    <Text style={[styles.actionText, { color: '#fff' }]}>Borrar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            );
+          })
+        )}
       </View>
-    </View>
+
+      <TouchableOpacity style={styles.primaryButton} onPress={() => router.push('/') }>
+        <Text style={styles.primaryButtonText}>Registrar entrenamiento ahora</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     paddingHorizontal: 16,
     backgroundColor: '#f7f7f7',
+  },
+  scrollContent: {
     paddingTop: 24,
+    paddingBottom: 32,
   },
   title: {
     fontSize: 24,
@@ -306,36 +432,59 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
   },
-  clearButton: {
-    backgroundColor: '#fff',
-    borderColor: '#ddd',
-  },
-  clearLabel: {
-    color: '#c00',
-    fontWeight: '600',
-  },
   calendar: {
     width: '100%',
     borderRadius: 8,
     padding: 8,
   },
-
-  /* lista abajo */
-  listContainer: {
+  helperText: {
+    marginTop: 8,
+    color: '#666',
+    fontSize: 12,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     width: '100%',
-    marginTop: 12,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
+    marginBottom: 12,
+  },
+  statCard: {
     flex: 1,
+    backgroundColor: '#fff',
+    padding: 12,
+    borderRadius: 12,
+    marginHorizontal: 4,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  statLabel: {
+    color: '#666',
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111',
+  },
+  card: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 8,
   },
   listTitle: {
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 6,
-  },
-  listScroll: {
-    maxHeight: 220,
   },
   emptyText: {
     color: '#666',
@@ -380,11 +529,31 @@ const styles = StyleSheet.create({
   deleteButton: {
     backgroundColor: '#c00',
   },
-  disabledButton: {
-    backgroundColor: '#f3f3f3',
+  weeklyRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f5f5f5',
   },
-  disabledText: {
-    color: '#999',
-    fontWeight: '600',
+  weeklyCount: {
+    fontWeight: '700',
+    color: '#222',
+  },
+  primaryButton: {
+    width: '100%',
+    backgroundColor: '#FC3058',
+    paddingVertical: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  primaryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
 });
