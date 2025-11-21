@@ -39,7 +39,7 @@ const buildExerciseImageUrl = (id: string | number, resolution: number = DEFAULT
 };
 
 const getApiKey = () => {
-    const apiKey = process.env.EXPO_PUBLIC_RAPIDAPI_KEY;
+    const apiKey = "112d73487fmshe91ccfabdca7b08p1a9b1ejsnebe43c1e4234";
     if (!apiKey) {
         throw new Error('RapidAPI key is not configured.');
     }
