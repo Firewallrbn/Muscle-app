@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, SafeAreaView, StyleSheet, Text, View, FlatList } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/utils/Supabase';
-import { fetchRoutineDetail } from '@/utils/routines';
+import { fetchRoutineDetails } from '@/utils/routines';
 import { RoutineExerciseDisplay } from '@/types';
 
 interface RoutineDetail {
@@ -34,8 +34,8 @@ export default function RoutineDetailScreen() {
         if (routineError || !data) throw routineError;
         setRoutine(data);
 
-        const detail = await fetchRoutineDetail(id);
-        setItems(detail as RoutineExerciseDisplay[]);
+        const detail = await fetchRoutineDetails(id);
+        setItems(detail);
       } catch (err) {
         console.error('Routine detail error', err);
         setError('No pudimos cargar esta rutina.');
@@ -51,8 +51,8 @@ export default function RoutineDetailScreen() {
     <View style={styles.exerciseCard}>
       <View style={styles.exerciseHeader}>
         <Text style={styles.exerciseIndex}>#{item.position}</Text>
-        <Text style={styles.exerciseName}>{item.exercises.name}</Text>
-        <Text style={styles.exerciseBadge}>{item.exercises.muscle_group}</Text>
+        <Text style={styles.exerciseName}>{item.exercise.name}</Text>
+        <Text style={styles.exerciseBadge}>{item.exercise.bodyPart}</Text>
       </View>
       <Text style={styles.exerciseMeta}>
         {item.sets ? `${item.sets}x` : '-'} {item.reps ? `${item.reps} reps` : ''}
@@ -67,7 +67,7 @@ export default function RoutineDetailScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}> 
+      <SafeAreaView style={styles.container}>
         <View style={styles.centered}>
           <ActivityIndicator color="#FC3058" />
         </View>
@@ -77,7 +77,7 @@ export default function RoutineDetailScreen() {
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container}> 
+      <SafeAreaView style={styles.container}>
         <View style={styles.centered}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
@@ -98,7 +98,7 @@ export default function RoutineDetailScreen() {
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ListEmptyComponent={() => (
-          <View style={styles.centered}> 
+          <View style={styles.centered}>
             <Text style={styles.errorText}>No hay ejercicios en esta rutina.</Text>
           </View>
         )}

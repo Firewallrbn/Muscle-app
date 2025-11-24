@@ -1,6 +1,7 @@
+import { RoutineExerciseInput } from "@/Context/RoutineBuilderContext";
+import { RoutineExerciseDisplay } from "@/types";
+import { fetchExerciseById } from "./exerciseApi";
 import { supabase } from "./Supabase";
-import { RoutineExerciseInput } from "../Context/RoutineBuilderContext";
-import { Exercise } from "../types";
 
 export interface Routine {
   id: string;
@@ -22,74 +23,58 @@ export const fetchUserRoutines = async (profileId: string) => {
   return data as Routine[];
 };
 
-export const fetchExercises = async (profileId?: string, onlyLiked?: boolean) => {
-  if (onlyLiked && profileId) {
-    const { data, error } = await supabase
-      .from("exercises")
-      .select("*, exercise_likes!inner(profile_id)")
-      .eq("exercise_likes.profile_id", profileId)
-      .order("muscle_group", { ascending: true })
-      .order("name", { ascending: true });
-
-    if (error) throw error;
-    return data as Exercise[];
-  }
-
+export const createRoutine = async (profile_id: string, name: string, description?: string) => {
   const { data, error } = await supabase
-    .from("exercises")
-    .select("*")
-    .order("muscle_group", { ascending: true })
-    .order("name", { ascending: true });
-
-  if (error) throw error;
-  return data as Exercise[];
-};
-
-export const fetchRoutineDetail = async (routineId: string) => {
-  const { data, error } = await supabase
-    .from("routine_exercises")
-    .select("id, position, sets, reps, weight, rest_seconds, notes, exercises (id, name, muscle_group, equipment, difficulty, image_url)")
-    .eq("routine_id", routineId)
-    .order("position", { ascending: true });
-
-  if (error) throw error;
-  return data;
-};
-
-export const createRoutineWithExercises = async (
-  profileId: string,
-  name: string,
-  description: string,
-  exercises: RoutineExerciseInput[]
-) => {
-  const { data: routineData, error: routineError } = await supabase
     .from("routines")
-    .insert([{ profile_id: profileId, name, description }])
+    .insert({ profile_id, name, description })
     .select("id")
     .single();
 
-  if (routineError || !routineData) {
-    throw routineError ?? new Error("Unable to create routine");
+  if (error || !data) throw error ?? new Error("Unable to create routine");
+  return data.id as string;
+};
+
+export const addExerciseToRoutine = async (
+  payload: Omit<RoutineExerciseInput, "exercise"> & {
+    routine_id: string;
+    exercise_api_id: string;
   }
+) => {
+  const { error } = await supabase.from("routine_exercises").insert({
+    routine_id: payload.routine_id,
+    exercise_api_id: payload.exercise_api_id,
+    position: payload.position,
+    sets: payload.sets ?? null,
+    reps: payload.reps ?? null,
+    weight: payload.weight ?? null,
+    rest_seconds: payload.rest_seconds ?? null,
+    notes: payload.notes ?? null,
+  });
 
-  if (!exercises.length) return routineData.id;
+  if (error) throw error;
+};
 
-  const routineExercisesPayload = exercises.map((item, index) => ({
-    routine_id: routineData.id,
-    exercise_id: item.exercise.id,
-    position: index + 1,
-    sets: item.sets ?? null,
-    reps: item.reps ?? null,
-    weight: item.weight ?? null,
-    rest_seconds: item.rest_seconds ?? null,
-    notes: item.notes ?? null,
-  }));
-
-  const { error: routineExercisesError } = await supabase
+export const fetchRoutineDetails = async (routine_id: string): Promise<RoutineExerciseDisplay[]> => {
+  const { data, error } = await supabase
     .from("routine_exercises")
-    .insert(routineExercisesPayload);
+    .select("id, exercise_api_id, position, sets, reps, weight, rest_seconds, notes")
+    .eq("routine_id", routine_id)
+    .order("position", { ascending: true });
 
-  if (routineExercisesError) throw routineExercisesError;
+  if (error) throw error;
 
-  return routineData.id;
+  const exercises = await Promise.all(
+    (data ?? []).map(async (item) => ({
+      id: item.id,
+      position: item.position,
+      sets: item.sets,
+      reps: item.reps,
+      weight: item.weight,
+      rest_seconds: item.rest_seconds,
+      notes: item.notes,
+      exercise: await fetchExerciseById(item.exercise_api_id),
+    }))
+  );
+
+  return exercises;
 };

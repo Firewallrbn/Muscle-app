@@ -1,36 +1,39 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
 import { useRoutineBuilder } from '@/Context/RoutineBuilderContext';
 import { AuthContext } from '@/Context/AuthContext';
 import { Exercise } from '@/types';
-import { fetchExercises } from '@/utils/routines';
+import { useExerciseContext } from '@/Context/ExerciseContext';
+import { fetchLikedExercises } from '@/utils/exerciseApi';
+import ExerciseCard from '@/components/ExerciseCard';
 
 export default function AddExercisesScreen() {
   const { user } = useContext(AuthContext);
   const { addExercise, exercises } = useRoutineBuilder();
+  const { exercises: apiExercises, loading, error } = useExerciseContext();
   const [onlyFavorites, setOnlyFavorites] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<Exercise[]>([]);
-
-  const loadExercises = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const items = await fetchExercises(user?.id, onlyFavorites);
-      setData(items);
-    } catch (err) {
-      console.error('Error fetching exercises', err);
-      setError('No pudimos cargar los ejercicios');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [likedIds, setLikedIds] = useState<string[]>([]);
 
   useEffect(() => {
-    loadExercises();
-  }, [onlyFavorites]);
+    const load = async () => {
+      if (!user?.id) return;
+      try {
+        const liked = await fetchLikedExercises(user.id);
+        setLikedIds(liked);
+      } catch (err) {
+        console.error('Error loading liked exercises', err);
+      }
+    };
+    load();
+  }, [user?.id]);
+
+  const visibleExercises = useMemo(() => {
+    if (onlyFavorites) {
+      return apiExercises.filter((item) => likedIds.includes(item.id));
+    }
+    return apiExercises;
+  }, [apiExercises, likedIds, onlyFavorites]);
 
   const handleAdd = (exercise: Exercise) => {
     const alreadyAdded = exercises.some((item) => item.exercise.id === exercise.id);
@@ -43,14 +46,7 @@ export default function AddExercisesScreen() {
 
   const renderExercise = ({ item }: { item: Exercise }) => (
     <TouchableOpacity style={styles.card} onPress={() => handleAdd(item)}>
-      <View style={styles.cardRow}>
-        <View>
-          <Text style={styles.cardTitle}>{item.name}</Text>
-          <Text style={styles.cardSubtitle}>{item.muscle_group}</Text>
-        </View>
-        <Text style={styles.badge}>{item.difficulty ?? 'n/a'}</Text>
-      </View>
-      {item.equipment ? <Text style={styles.cardMeta}>{item.equipment}</Text> : null}
+      <ExerciseCard exercise={item} liked={likedIds.includes(item.id)} />
     </TouchableOpacity>
   );
 
@@ -64,23 +60,20 @@ export default function AddExercisesScreen() {
       </View>
 
       {loading ? (
-        <View style={styles.centered}> 
+        <View style={styles.centered}>
           <ActivityIndicator color="#FC3058" />
         </View>
       ) : error ? (
-        <View style={styles.centered}> 
+        <View style={styles.centered}>
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity onPress={loadExercises}>
-            <Text style={styles.retryText}>Reintentar</Text>
-          </TouchableOpacity>
         </View>
       ) : (
         <FlatList
-          data={data}
+          data={visibleExercises}
           keyExtractor={(item) => item.id}
           renderItem={renderExercise}
           ListEmptyComponent={() => (
-            <View style={styles.centered}> 
+            <View style={styles.centered}>
               <Text style={styles.errorText}>No se encontraron ejercicios.</Text>
             </View>
           )}
@@ -137,35 +130,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 8,
   },
-  retryText: {
-    color: '#FC3058',
-  },
   card: {
-    backgroundColor: '#1C1C1E',
-    borderRadius: 14,
-    padding: 14,
     marginBottom: 10,
-  },
-  cardRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  cardTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  cardSubtitle: {
-    color: '#8C8B91',
-  },
-  badge: {
-    color: '#FC3058',
-    fontWeight: '700',
-  },
-  cardMeta: {
-    color: '#B5B4BB',
-    marginTop: 4,
   },
   footer: {
     flexDirection: 'row',

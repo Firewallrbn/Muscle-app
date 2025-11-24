@@ -2,8 +2,9 @@ import Camera from '@/components/Camera';
 import CategoryChip from '@/components/CategoryChip';
 import ExerciseCard from '@/components/ExerciseCard';
 import { useExerciseContext } from '@/Context/ExerciseContext';
+import { AuthContext } from '@/Context/AuthContext';
 import { Exercise } from '@/types';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useContext, useEffect } from 'react';
 import {
     ActivityIndicator,
     FlatList,
@@ -11,32 +12,61 @@ import {
     StyleSheet,
     Text,
     TextInput,
+    TouchableOpacity,
     View,
 } from 'react-native';
+import { fetchLikedExercises, toggleLike } from '@/utils/exerciseApi';
 
 const ITEMS_PER_BATCH = 20;
 
 const ExercisesScreen: React.FC = () => {
     const { bodyParts, exercises, loading, error } = useExerciseContext();
+    const { user } = useContext(AuthContext);
     const [selectedBodyPart, setSelectedBodyPart] = useState<string | null>(null);
     const [visibleCount, setVisibleCount] = useState<number>(ITEMS_PER_BATCH);
     const [searchQuery, setSearchQuery] = useState<string>('');
+    const [likedIds, setLikedIds] = useState<string[]>([]);
+    const [showFavorites, setShowFavorites] = useState(false);
+    const [processingLike, setProcessingLike] = useState(false);
 
     const categories = useMemo(() => ['all', ...bodyParts], [bodyParts]);
 
+    const loadLikes = useCallback(async () => {
+        if (!user?.id) return;
+        try {
+            const liked = await fetchLikedExercises(user.id);
+            setLikedIds(liked);
+        } catch (err) {
+            console.error('Error loading likes', err);
+        }
+    }, [user?.id]);
+
+    useEffect(() => {
+        loadLikes();
+    }, [loadLikes]);
+
     const filteredExercises = useMemo(() => {
-        if (!selectedBodyPart || selectedBodyPart === 'all') {
-            return exercises;
+        let list = exercises;
+
+        if (selectedBodyPart && selectedBodyPart !== 'all') {
+            list = list.filter((exercise) => exercise.bodyPart.toLowerCase() === selectedBodyPart.toLowerCase());
         }
 
-        return exercises.filter(
-            (exercise) => exercise.bodyPart.toLowerCase() === selectedBodyPart.toLowerCase(),
-        );
-    }, [exercises, selectedBodyPart]);
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            list = list.filter((exercise) => exercise.name.toLowerCase().includes(query));
+        }
+
+        if (showFavorites) {
+            list = list.filter((exercise) => likedIds.includes(exercise.id));
+        }
+
+        return list;
+    }, [exercises, selectedBodyPart, searchQuery, showFavorites, likedIds]);
 
     useEffect(() => {
         setVisibleCount(ITEMS_PER_BATCH);
-    }, [selectedBodyPart, exercises]);
+    }, [selectedBodyPart, exercises, showFavorites, searchQuery]);
 
     const displayedExercises = useMemo(
         () => filteredExercises.slice(0, visibleCount),
@@ -66,9 +96,30 @@ const ExercisesScreen: React.FC = () => {
         setVisibleCount((prev) => Math.min(prev + ITEMS_PER_BATCH, filteredExercises.length));
     }, [filteredExercises.length, loading, visibleCount]);
 
-    const renderExercise = useCallback(({ item }: { item: Exercise }) => {
-        return <ExerciseCard exercise={item} />;
-    }, []);
+    const handleToggleFavorite = useCallback(
+        async (exerciseId: string) => {
+            if (!user?.id || processingLike) return;
+            setProcessingLike(true);
+            try {
+                const status = await toggleLike(user.id, exerciseId);
+                setLikedIds((prev) =>
+                    status === 'liked' ? [...prev, exerciseId] : prev.filter((id) => id !== exerciseId)
+                );
+            } catch (err) {
+                console.error('Toggle like error', err);
+            } finally {
+                setProcessingLike(false);
+            }
+        },
+        [user?.id, processingLike],
+    );
+
+    const renderExercise = useCallback(
+        ({ item }: { item: Exercise }) => {
+            return <ExerciseCard exercise={item} liked={likedIds.includes(item.id)} onToggleLike={handleToggleFavorite} />;
+        },
+        [handleToggleFavorite, likedIds],
+    );
 
     const keyExtractor = useCallback((item: Exercise) => item.id, []);
 
@@ -83,6 +134,7 @@ const ExercisesScreen: React.FC = () => {
         [handleSelectCategory, selectedBodyPart],
 
     );
+
     const listHeaderComponent = useMemo(
         () => (
             <View style={styles.headerContainer}>
@@ -96,15 +148,28 @@ const ExercisesScreen: React.FC = () => {
                         editable={!loading}
                     />
                 </View>
-                <View style={styles.categoriesContainer}>
-                    <FlatList
-                        data={categories}
-                        keyExtractor={(item) => item}
-                        renderItem={renderCategoryChip}
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.categoriesContent}
-                    />
+                <View style={styles.filterRow}>
+                    <View style={styles.categoriesContainer}>
+                        <FlatList
+                            data={categories}
+                            keyExtractor={(item) => item}
+                            renderItem={renderCategoryChip}
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.categoriesContent}
+                        />
+                    </View>
+                    <TouchableOpacity
+                        style={[styles.favButton, showFavorites && styles.favButtonActive]}
+                        onPress={() => {
+                            setShowFavorites((prev) => !prev);
+                            if (!showFavorites) {
+                                loadLikes();
+                            }
+                        }}
+                    >
+                        <Text style={styles.favButtonText}>{showFavorites ? 'Showing favorites' : 'Show favorites'}</Text>
+                    </TouchableOpacity>
                 </View>
                 {error && exercises.length > 0 && (
                     <View style={styles.errorBanner}>
@@ -113,7 +178,7 @@ const ExercisesScreen: React.FC = () => {
                 )}
             </View>
         ),
-        [categories, error, exercises.length, loading, renderCategoryChip, searchQuery],
+        [categories, error, exercises.length, loading, renderCategoryChip, searchQuery, showFavorites, loadLikes],
     );
 
     if (loading && exercises.length === 0) {
@@ -201,7 +266,8 @@ const styles = StyleSheet.create({
         color: '#1C1C1E',
     },
     categoriesContainer: {
-        marginTop: 20,
+        marginTop: 12,
+        flex: 1,
     },
     categoriesContent: {
         paddingRight: 20,
@@ -235,6 +301,25 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#8E8E93',
         textAlign: 'center',
+    },
+    favButton: {
+        backgroundColor: '#1C1C1E',
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        borderRadius: 12,
+    },
+    favButtonActive: {
+        backgroundColor: '#FC3058',
+    },
+    favButtonText: {
+        color: '#FFFFFF',
+        fontWeight: '600',
+    },
+    filterRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        marginTop: 12,
     },
 });
 

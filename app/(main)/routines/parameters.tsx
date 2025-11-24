@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
 import { useRoutineBuilder } from '@/Context/RoutineBuilderContext';
-import { createRoutineWithExercises } from '@/utils/routines';
+import { createRoutine, addExerciseToRoutine } from '@/utils/routines';
 import { AuthContext } from '@/Context/AuthContext';
 
 export default function RoutineParametersScreen() {
@@ -27,7 +27,20 @@ export default function RoutineParametersScreen() {
 
     setSaving(true);
     try {
-      const routineId = await createRoutineWithExercises(user.id, name, description, exercises);
+      const routineId = await createRoutine(user.id, name, description);
+      for (const item of exercises) {
+        await addExerciseToRoutine({
+          routine_id: routineId,
+          exercise_api_id: item.exercise.id,
+          position: item.position,
+          sets: item.sets,
+          reps: item.reps,
+          weight: item.weight,
+          rest_seconds: item.rest_seconds,
+          notes: item.notes,
+        });
+      }
+      Alert.alert('Rutina guardada', 'Tu rutina fue creada con éxito.');
       reset();
       router.replace(`/(main)/routines/${routineId}`);
     } catch (err) {
@@ -46,7 +59,7 @@ export default function RoutineParametersScreen() {
           <Text style={styles.removeText}>Eliminar</Text>
         </TouchableOpacity>
       </View>
-      <Text style={styles.cardSubtitle}>{`#${item.position} • ${item.exercise.muscle_group}`}</Text>
+      <Text style={styles.cardSubtitle}>{`#${item.position} • ${item.exercise.bodyPart}`}</Text>
 
       <View style={styles.row}>
         <View style={styles.inputGroup}>
@@ -124,11 +137,8 @@ export default function RoutineParametersScreen() {
         keyExtractor={(item) => item.exercise.id}
         renderItem={renderExercise}
         ListEmptyComponent={() => (
-          <View style={styles.centered}> 
+          <View style={styles.centered}>
             <Text style={styles.emptyText}>No has agregado ejercicios.</Text>
-            <TouchableOpacity onPress={() => router.push('/(main)/routines/add-exercises')}>
-              <Text style={styles.link}>Añadir ejercicios</Text>
-            </TouchableOpacity>
           </View>
         )}
         contentContainerStyle={{ paddingBottom: 140 }}
