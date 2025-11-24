@@ -16,18 +16,41 @@ const buildHeaders = () => ({
   "x-rapidapi-key": getApiKey(),
 });
 
-const mapApiExercise = (payload: any): Exercise => ({
-  id: payload.id?.toString(),
-  name: payload.name ?? "Unknown exercise",
-  bodyPart: payload.bodyPart ?? "Unknown",
-  target: payload.target ?? "Unknown",
-  equipment: payload.equipment ?? null,
-  gifUrl: payload.gifUrl,
-  imageUrl: payload.image ?? payload.gifUrl,
-});
+// 🔥 NUEVO: builder como tenías antes
+const DEFAULT_IMAGE_RESOLUTION = 360;
+
+const buildExerciseImageUrl = (
+  id: string | number,
+  resolution: number = DEFAULT_IMAGE_RESOLUTION
+) => {
+  const apiKey = getApiKey();
+  const paddedId = id.toString().padStart(4, "0");
+  return `https://exercisedb.p.rapidapi.com/image?exerciseId=${paddedId}&resolution=${resolution}&rapidapi-key=${apiKey}`;
+};
+
+// 🔥 NUEVO: Fallback robusto en mapApiExercise
+const mapApiExercise = (payload: any): Exercise => {
+  const id = payload.id?.toString();
+
+  return {
+    id,
+    name: payload.name ?? "Unknown exercise",
+    bodyPart: payload.bodyPart ?? "Unknown",
+    target: payload.target ?? "Unknown",
+    equipment: payload.equipment ?? null,
+    gifUrl: payload.gifUrl,
+    // Fallbacks en orden:
+    imageUrl:
+      payload.image ??
+      payload.gifUrl ??
+      (id ? buildExerciseImageUrl(id) : undefined),
+  };
+};
 
 export const fetchExercisesFromAPI = async (): Promise<Exercise[]> => {
-  const response = await fetch(`${API_BASE_URL}/exercises`, { headers: buildHeaders() });
+  const response = await fetch(`${API_BASE_URL}/exercises`, {
+    headers: buildHeaders(),
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch exercises from ExerciseDB");
@@ -38,7 +61,9 @@ export const fetchExercisesFromAPI = async (): Promise<Exercise[]> => {
 };
 
 export const fetchExerciseById = async (id: string): Promise<Exercise> => {
-  const response = await fetch(`${API_BASE_URL}/exercises/exerciseId/${id}`, { headers: buildHeaders() });
+  const response = await fetch(`${API_BASE_URL}/exercises/exerciseId/${id}`, {
+    headers: buildHeaders(),
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch exercise detail from ExerciseDB");
@@ -48,7 +73,10 @@ export const fetchExerciseById = async (id: string): Promise<Exercise> => {
   return mapApiExercise(payload);
 };
 
-export const toggleLike = async (profile_id: string, exercise_api_id: string): Promise<"liked" | "unliked"> => {
+export const toggleLike = async (
+  profile_id: string,
+  exercise_api_id: string
+): Promise<"liked" | "unliked"> => {
   const { data, error } = await supabase
     .from("exercise_likes")
     .select("profile_id")
@@ -79,7 +107,9 @@ export const toggleLike = async (profile_id: string, exercise_api_id: string): P
   return "liked";
 };
 
-export const fetchLikedExercises = async (profile_id: string): Promise<string[]> => {
+export const fetchLikedExercises = async (
+  profile_id: string
+): Promise<string[]> => {
   const { data, error } = await supabase
     .from("exercise_likes")
     .select("exercise_api_id")
