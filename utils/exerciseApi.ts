@@ -28,6 +28,16 @@ const buildExerciseImageUrl = (
   return `https://exercisedb.p.rapidapi.com/image?exerciseId=${paddedId}&resolution=${resolution}&rapidapi-key=${apiKey}`;
 };
 
+/**
+ * Supabase column `exercise_id` is a UUID, but ExerciseDB IDs are short numeric strings (e.g. "0001").
+ * This helper pads the ExerciseDB ID into a valid UUID shape that stays deterministic for the same exercise.
+ */
+export const normalizeExerciseId = (exerciseId: string) => {
+  const sanitized = exerciseId.replace(/[^a-fA-F0-9]/g, "");
+  const padded = sanitized.slice(-12).padStart(12, "0");
+  return `00000000-0000-0000-0000-${padded}`;
+};
+
 // 🔥 NUEVO: Fallback robusto en mapApiExercise
 const mapApiExercise = (payload: any): Exercise => {
   const id = payload.id?.toString();
@@ -77,11 +87,13 @@ export const toggleLike = async (
   profile_id: string,
   exercise_id: string
 ): Promise<"liked" | "unliked"> => {
+  const normalizedExerciseId = normalizeExerciseId(exercise_id);
+
   const { data, error } = await supabase
     .from("exercise_likes")
     .select("profile_id")
     .eq("profile_id", profile_id)
-    .eq("exercise_id", exercise_id)
+    .eq("exercise_id", normalizedExerciseId)
     .maybeSingle();
 
   if (error) {
@@ -93,7 +105,7 @@ export const toggleLike = async (
       .from("exercise_likes")
       .delete()
       .eq("profile_id", profile_id)
-      .eq("exercise_id", exercise_id);
+      .eq("exercise_id", normalizedExerciseId);
 
     if (deleteError) throw deleteError;
     return "unliked";
@@ -101,7 +113,7 @@ export const toggleLike = async (
 
   const { error: insertError } = await supabase
     .from("exercise_likes")
-    .insert({ profile_id, exercise_id });
+    .insert({ profile_id, exercise_id: normalizedExerciseId });
 
   if (insertError) throw insertError;
   return "liked";

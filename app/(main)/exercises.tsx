@@ -15,7 +15,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { fetchLikedExercises, toggleLike } from '@/utils/exerciseApi';
+import { fetchLikedExercises, normalizeExerciseId, toggleLike } from '@/utils/exerciseApi';
 
 const ITEMS_PER_BATCH = 20;
 
@@ -58,7 +58,7 @@ const ExercisesScreen: React.FC = () => {
         }
 
         if (showFavorites) {
-            list = list.filter((exercise) => likedIds.includes(exercise.id));
+            list = list.filter((exercise) => likedIds.includes(normalizeExerciseId(exercise.id)));
         }
 
         return list;
@@ -101,9 +101,12 @@ const ExercisesScreen: React.FC = () => {
             if (!user?.id || processingLike) return;
             setProcessingLike(true);
             try {
+                const normalizedId = normalizeExerciseId(exerciseId);
                 const status = await toggleLike(user.id, exerciseId);
                 setLikedIds((prev) =>
-                    status === 'liked' ? [...prev, exerciseId] : prev.filter((id) => id !== exerciseId)
+                    status === 'liked'
+                        ? [...prev, normalizedId]
+                        : prev.filter((id) => id !== normalizedId)
                 );
             } catch (err) {
                 console.error('Toggle like error', err);
@@ -116,7 +119,13 @@ const ExercisesScreen: React.FC = () => {
 
     const renderExercise = useCallback(
         ({ item }: { item: Exercise }) => {
-            return <ExerciseCard exercise={item} liked={likedIds.includes(item.id)} onToggleLike={handleToggleFavorite} />;
+            return (
+                <ExerciseCard
+                    exercise={item}
+                    liked={likedIds.includes(normalizeExerciseId(item.id))}
+                    onToggleLike={handleToggleFavorite}
+                />
+            );
         },
         [handleToggleFavorite, likedIds],
     );
