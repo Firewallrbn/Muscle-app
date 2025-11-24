@@ -75,13 +75,13 @@ export const fetchExerciseById = async (id: string): Promise<Exercise> => {
 
 export const toggleLike = async (
   profile_id: string,
-  exercise_api_id: string
+  exercise_id: string
 ): Promise<"liked" | "unliked"> => {
   const { data, error } = await supabase
     .from("exercise_likes")
     .select("profile_id")
     .eq("profile_id", profile_id)
-    .eq("exercise_api_id", exercise_api_id)
+    .eq("exercise_id", exercise_id)
     .maybeSingle();
 
   if (error) {
@@ -93,7 +93,7 @@ export const toggleLike = async (
       .from("exercise_likes")
       .delete()
       .eq("profile_id", profile_id)
-      .eq("exercise_api_id", exercise_api_id);
+      .eq("exercise_id", exercise_id);
 
     if (deleteError) throw deleteError;
     return "unliked";
@@ -101,7 +101,7 @@ export const toggleLike = async (
 
   const { error: insertError } = await supabase
     .from("exercise_likes")
-    .insert({ profile_id, exercise_api_id });
+    .insert({ profile_id, exercise_id });
 
   if (insertError) throw insertError;
   return "liked";
@@ -112,9 +112,9 @@ export const fetchLikedExercises = async (
 ): Promise<string[]> => {
   const { data, error } = await supabase
     .from("exercise_likes")
-    .select("exercise_api_id")
+    .select("exercise_id")
     .eq("profile_id", profile_id);
 
   if (error) throw error;
-  return data?.map((item) => item.exercise_api_id) ?? [];
+  return data?.map((item) => item.exercise_id) ?? [];
 };

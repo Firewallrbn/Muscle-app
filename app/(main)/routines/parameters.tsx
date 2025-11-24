@@ -31,7 +31,7 @@ export default function RoutineParametersScreen() {
       for (const item of exercises) {
         await addExerciseToRoutine({
           routine_id: routineId,
-          exercise_api_id: item.exercise.id,
+          exercise_id: item.exercise.id,
           position: item.position,
           sets: item.sets,
           reps: item.reps,

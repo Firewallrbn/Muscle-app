@@ -37,12 +37,12 @@ export const createRoutine = async (profile_id: string, name: string, descriptio
 export const addExerciseToRoutine = async (
   payload: Omit<RoutineExerciseInput, "exercise"> & {
     routine_id: string;
-    exercise_api_id: string;
+    exercise_id: string;
   }
 ) => {
   const { error } = await supabase.from("routine_exercises").insert({
     routine_id: payload.routine_id,
-    exercise_api_id: payload.exercise_api_id,
+    exercise_id: payload.exercise_id,
     position: payload.position,
     sets: payload.sets ?? null,
     reps: payload.reps ?? null,
@@ -57,7 +57,7 @@ export const addExerciseToRoutine = async (
 export const fetchRoutineDetails = async (routine_id: string): Promise<RoutineExerciseDisplay[]> => {
   const { data, error } = await supabase
     .from("routine_exercises")
-    .select("id, exercise_api_id, position, sets, reps, weight, rest_seconds, notes")
+    .select("id, exercise_id, position, sets, reps, weight, rest_seconds, notes")
     .eq("routine_id", routine_id)
     .order("position", { ascending: true });
 
@@ -72,7 +72,7 @@ export const fetchRoutineDetails = async (routine_id: string): Promise<RoutineEx
       weight: item.weight,
       rest_seconds: item.rest_seconds,
       notes: item.notes,
-      exercise: await fetchExerciseById(item.exercise_api_id),
+      exercise: await fetchExerciseById(item.exercise_id),
     }))
   );
 
