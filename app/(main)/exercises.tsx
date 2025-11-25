@@ -3,6 +3,7 @@ import CategoryChip from '@/components/CategoryChip';
 import ExerciseCard from '@/components/ExerciseCard';
 import { AuthContext } from '@/Context/AuthContext';
 import { useExerciseContext } from '@/Context/ExerciseContext';
+import { useTheme } from '@/Context/ThemeContext';
 import { Exercise } from '@/types';
 import { fetchLikedExercises, normalizeExerciseId, toggleLike } from '@/utils/exerciseApi';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -22,6 +23,9 @@ const ITEMS_PER_BATCH = 20;
 const ExercisesScreen: React.FC = () => {
     const { bodyParts, exercises, loading, error } = useExerciseContext();
     const { user } = useContext(AuthContext);
+    const { theme } = useTheme();
+    const { colors } = theme;
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const [selectedBodyPart, setSelectedBodyPart] = useState<string | null>(null);
     const [visibleCount, setVisibleCount] = useState<number>(ITEMS_PER_BATCH);
     const [searchQuery, setSearchQuery] = useState<string>('');
@@ -156,7 +160,7 @@ const handleToggleFavorite = useCallback(
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         placeholder="Search exercises"
-                        placeholderTextColor="#8E8E93"
+                        placeholderTextColor={colors.textSecondary}
                         style={styles.searchInput}
                         editable={!loading}
                     />
@@ -197,7 +201,7 @@ const handleToggleFavorite = useCallback(
     if (loading && exercises.length === 0) {
         return (
             <SafeAreaView style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#0A84FF" />
+                <ActivityIndicator size="large" color={colors.secondary} />
             </SafeAreaView>
         );
     }
@@ -237,103 +241,112 @@ const handleToggleFavorite = useCallback(
 };
 
 
-const styles = StyleSheet.create({
-
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#F8F9FB',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#F8F9FB',
-        paddingHorizontal: 24,
-    },
-    errorText: {
-        fontSize: 16,
-        color: '#FF3B30',
-        textAlign: 'center',
-    },
-    listContent: {
-        paddingHorizontal: 20,
-        paddingBottom: 32,
-    },
-    headerContainer: {
-        paddingTop: 12,
-        marginBottom: 16,
-    },
-    searchContainer: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 20,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-        elevation: 3,
-    },
-    searchInput: {
-        fontSize: 16,
-        color: '#1C1C1E',
-    },
-    categoriesContainer: {
-        marginTop: 12,
-        flex: 1,
-    },
-    categoriesContent: {
-        paddingRight: 20,
-    },
-    errorBanner: {
-        marginTop: 16,
-        backgroundColor: '#FDECEA',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 16,
-    },
-    errorBannerText: {
-        fontSize: 14,
-        color: '#D93025',
-        textAlign: 'center',
-    },
-    footerSpacing: {
-        height: 32,
-    },
-    emptyState: {
-        marginTop: 80,
-        alignItems: 'center',
-    },
-    emptyTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#1C1C1E',
-        marginBottom: 6,
-    },
-    emptySubtitle: {
-        fontSize: 14,
-        color: '#8E8E93',
-        textAlign: 'center',
-    },
-    favButton: {
-        backgroundColor: '#1C1C1E',
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        borderRadius: 12,
-    },
-    favButtonActive: {
-        backgroundColor: '#FC3058',
-    },
-    favButtonText: {
-        color: '#FFFFFF',
-        fontWeight: '600',
-    },
-    filterRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-        marginTop: 12,
-    },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>['theme']) => {
+    const { colors } = theme;
+    return StyleSheet.create({
+        safeArea: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        loadingContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: colors.background,
+            paddingHorizontal: 24,
+        },
+        errorText: {
+            fontSize: 16,
+            color: colors.accent,
+            textAlign: 'center',
+        },
+        listContent: {
+            paddingHorizontal: 16,
+            paddingBottom: 32,
+        },
+        headerContainer: {
+            paddingTop: 12,
+            marginBottom: 16,
+        },
+        searchContainer: {
+            backgroundColor: colors.input,
+            borderRadius: 14,
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            shadowColor: theme.mode === 'light' ? '#000' : 'transparent',
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: theme.mode === 'light' ? 0.08 : 0,
+            shadowRadius: 12,
+            elevation: theme.mode === 'light' ? 3 : 0,
+            borderWidth: 1,
+            borderColor: colors.border,
+        },
+        searchInput: {
+            fontSize: 16,
+            color: colors.text,
+        },
+        categoriesContainer: {
+            marginTop: 12,
+            flex: 1,
+        },
+        categoriesContent: {
+            paddingRight: 16,
+        },
+        errorBanner: {
+            marginTop: 16,
+            backgroundColor: theme.mode === 'light' ? '#FDECEA' : colors.card,
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            borderRadius: 14,
+            borderWidth: 1,
+            borderColor: colors.border,
+        },
+        errorBannerText: {
+            fontSize: 14,
+            color: colors.accent,
+            textAlign: 'center',
+        },
+        footerSpacing: {
+            height: 32,
+        },
+        emptyState: {
+            marginTop: 80,
+            alignItems: 'center',
+        },
+        emptyTitle: {
+            fontSize: 18,
+            fontWeight: '700',
+            color: colors.text,
+            marginBottom: 6,
+        },
+        emptySubtitle: {
+            fontSize: 14,
+            color: colors.textSecondary,
+            textAlign: 'center',
+        },
+        favButton: {
+            backgroundColor: colors.card,
+            paddingHorizontal: 12,
+            paddingVertical: 10,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+        },
+        favButtonActive: {
+            backgroundColor: colors.accent,
+            borderColor: colors.accent,
+        },
+        favButtonText: {
+            color: theme.mode === 'light' ? '#ffffff' : colors.text,
+            fontWeight: '700',
+        },
+        filterRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+            marginTop: 12,
+        },
+    });
+};
 
 export default ExercisesScreen;
