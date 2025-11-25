@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, SafeAreaView, StyleSheet, Text, View, FlatList } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { RoutineExerciseDisplay } from '@/types';
 import { supabase } from '@/utils/Supabase';
 import { fetchRoutineDetails } from '@/utils/routines';
-import { RoutineExerciseDisplay } from '@/types';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
 
 interface RoutineDetail {
   id: string;
@@ -18,6 +19,7 @@ export default function RoutineDetailScreen() {
   const [items, setItems] = useState<RoutineExerciseDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const load = async () => {
@@ -65,6 +67,8 @@ export default function RoutineDetailScreen() {
     </View>
   );
 
+  const handleBack = () => router.back();
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -103,6 +107,26 @@ export default function RoutineDetailScreen() {
           </View>
         )}
       />
+
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={styles.outlineButton}
+          onPress={handleBack}
+        >
+          <Text style={styles.outlineText}>Atrás</Text>
+        </TouchableOpacity>
+        {routine && (
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={() => router.push({
+              pathname: '/(main)/routines/execute',
+              params: { id: routine.id }
+            })}
+          >
+            <Text style={styles.primaryText}>Ejecutar rutina</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -169,5 +193,34 @@ const styles = StyleSheet.create({
   exerciseNotes: {
     color: '#8C8B91',
     marginTop: 6,
+  },
+  footer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  outlineButton: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 14,
+    padding: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#DADADA',
+  },
+  primaryButton: {
+    flex: 1,
+    backgroundColor: '#FC3058',
+    borderRadius: 14,
+    padding: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryText: {
+    color: '#fff',
+  },
+  outlineText: {
+    color: '#FC3058',
   },
 });

@@ -83,18 +83,35 @@ export const fetchExercisesFromAPI = async (): Promise<Exercise[]> => {
 };
 
 export const fetchExerciseById = async (exerciseId: string): Promise<Exercise> => {
-  const normalizedId = exerciseId.includes("-") ? denormalizeExerciseId(exerciseId) : exerciseId;
+  try {
+    // Si el ID ya está desnormalizado (corto como "0003"), úsalo directamente
+    const normalizedId = exerciseId.includes("-") 
+      ? denormalizeExerciseId(exerciseId) 
+      : exerciseId.padStart(4, "0"); // Asegúrate que tenga 4 dígitos
 
-  const response = await fetch(`${API_BASE_URL}/exercises/exerciseId/${normalizedId}`, {
-    headers: buildHeaders(),
-  });
+    console.log('Fetching from API with ID:', normalizedId);
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch exercise detail from ExerciseDB");
+    const response = await fetch(
+      `${API_BASE_URL}/exercises/exerciseId/${normalizedId}`,
+      {
+        headers: buildHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('API Error Response:', errorData);
+      throw new Error(`Failed to fetch exercise detail from ExerciseDB: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    console.log('API Response:', payload);
+    
+    return mapApiExercise(payload);
+  } catch (err) {
+    console.error('fetchExerciseById error:', err);
+    throw err;
   }
-
-  const payload = await response.json();
-  return mapApiExercise(payload);
 };
 
 export const toggleLike = async (
