@@ -64,16 +64,40 @@ export const fetchRoutineDetails = async (routine_id: string): Promise<RoutineEx
   if (error) throw error;
 
   const exercises = await Promise.all(
-    (data ?? []).map(async (item) => ({
-      id: item.id,
-      position: item.position,
-      sets: item.sets,
-      reps: item.reps,
-      weight: item.weight,
-      rest_seconds: item.rest_seconds,
-      notes: item.notes,
-      exercise: await fetchExerciseById(item.exercise_id),
-    }))
+    (data ?? []).map(async (item) => {
+      try {
+        return {
+          id: item.id,
+          position: item.position,
+          sets: item.sets,
+          reps: item.reps,
+          weight: item.weight,
+          rest_seconds: item.rest_seconds,
+          notes: item.notes,
+          exercise: await fetchExerciseById(item.exercise_id),
+        };
+      } catch (error) {
+        console.warn("Routine exercise fetch fallback", error);
+        return {
+          id: item.id,
+          position: item.position,
+          sets: item.sets,
+          reps: item.reps,
+          weight: item.weight,
+          rest_seconds: item.rest_seconds,
+          notes: item.notes,
+          exercise: {
+            id: item.exercise_id,
+            name: "Ejercicio desconocido",
+            bodyPart: "",
+            target: "",
+            equipment: null,
+            imageUrl: undefined,
+            gifUrl: undefined,
+          },
+        };
+      }
+    })
   );
 
   return exercises;

@@ -38,6 +38,18 @@ export const normalizeExerciseId = (exerciseId: string) => {
   return `00000000-0000-0000-0000-${padded}`;
 };
 
+export const denormalizeExerciseId = (exerciseId: string) => {
+  const sanitized = exerciseId.replace(/[^a-fA-F0-9]/g, "");
+  const lastTwelve = sanitized.slice(-12);
+  const trimmed = lastTwelve.replace(/^0+/, "");
+
+  if (trimmed) {
+    return trimmed.padStart(4, "0");
+  }
+
+  return exerciseId;
+};
+
 // 🔥 NUEVO: Fallback robusto en mapApiExercise
 const mapApiExercise = (payload: any): Exercise => {
   const id = payload.id?.toString();
@@ -70,8 +82,10 @@ export const fetchExercisesFromAPI = async (): Promise<Exercise[]> => {
   return (data as any[]).map(mapApiExercise);
 };
 
-export const fetchExerciseById = async (id: string): Promise<Exercise> => {
-  const response = await fetch(`${API_BASE_URL}/exercises/exerciseId/${id}`, {
+export const fetchExerciseById = async (exerciseId: string): Promise<Exercise> => {
+  const normalizedId = exerciseId.includes("-") ? denormalizeExerciseId(exerciseId) : exerciseId;
+
+  const response = await fetch(`${API_BASE_URL}/exercises/exerciseId/${normalizedId}`, {
     headers: buildHeaders(),
   });
 
