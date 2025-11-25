@@ -39,7 +39,7 @@ export default function RoutinesScreen() {
   };
 
   const renderRoutine = ({ item }: { item: Routine }) => (
-    <TouchableOpacity style={styles.card} onPress={() => router.push(`/(main)/routines/${item.id}`)}>
+    <TouchableOpacity style={styles.card} onPress={() => router.push(`/(tabs)/routines/${item.id}`)}>
       <View style={styles.cardHeader}>
         <Text style={styles.cardTitle}>{item.name}</Text>
         <Text style={styles.cardDate}>{new Date(item.created_at ?? '').toLocaleDateString()}</Text>
@@ -55,7 +55,7 @@ export default function RoutinesScreen() {
           <Text style={styles.title}>Tus rutinas</Text>
           <Text style={styles.subtitle}>Organiza y guarda tus entrenamientos.</Text>
         </View>
-        <TouchableOpacity style={styles.createButton} onPress={() => router.push('/(main)/routines/create')}>
+        <TouchableOpacity style={styles.createButton} onPress={() => router.push('/(tabs)/routines/create')}>
           <Text style={styles.createButtonText}>Crear</Text>
         </TouchableOpacity>
       </View>
@@ -80,7 +80,7 @@ export default function RoutinesScreen() {
           ListEmptyComponent={() => (
             <View style={styles.centered}> 
               <Text style={styles.emptyText}>Aún no tienes rutinas creadas.</Text>
-              <Link href="/(main)/routines/create" style={styles.linkText}>
+              <Link href="/(tabs)/routines/create" style={styles.linkText}>
                 Crear tu primera rutina
               </Link>
             </View>

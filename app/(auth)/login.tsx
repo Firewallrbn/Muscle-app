@@ -14,7 +14,7 @@ export default function Index() {
       const cleanPassword = password.trim();
     const success = await context.login(cleanEmail, cleanPassword);
     if (success) {
-        router.replace("/(main)/exercises");
+        router.replace("/(tabs)/exercises");
         console.log("Login exitoso");
     } else {
       alert("Error al iniciar sesión. Revisa tus credenciales.");
