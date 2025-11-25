@@ -1,33 +1,18 @@
 import { useNotifications } from '@/utils/Notifications';
+import {
+  TRAINING_STORAGE_KEY,
+  TRAINING_TYPES,
+  dateToString,
+  getTodayDateString,
+  loadTrainingMap,
+  saveTrainingMap,
+} from '@/utils/trainingTracker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
-
-const TRAINING_TYPES: { key: string; label: string; color: string }[] = [
-  { key: 'pierna', label: 'Pierna', color: '#FF6B6B' },
-  { key: 'tren_superior', label: 'Tren Superior', color: '#4D96FF' },
-  { key: 'core', label: 'Core', color: '#FFD93D' },
-  { key: 'pecho', label: 'Pecho', color: '#9B5DE5' },
-  { key: 'espalda', label: 'Espalda', color: '#2EC4B6' },
-  { key: 'full', label: 'Full', color: '#FF8A65' },
-];
-
-const STORAGE_KEY = '@muscle_training_data';
-
-const dateToString = (date: Date) => {
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-};
-
-const getTodayDateString = () => {
-  const d = new Date();
-  return dateToString(d);
-};
 
 const WEEKDAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
@@ -157,11 +142,8 @@ export default function MuscleScreen() {
 
   const loadData = async () => {
     try {
-      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-      if (jsonValue !== null) {
-        const data = JSON.parse(jsonValue);
-        setDateTypeMap(data);
-      }
+      const data = await loadTrainingMap();
+      setDateTypeMap(data);
     } catch (e) {
       console.error('Error al cargar datos:', e);
     } finally {
@@ -171,8 +153,7 @@ export default function MuscleScreen() {
 
   const saveData = async () => {
     try {
-      const jsonValue = JSON.stringify(dateTypeMap);
-      await AsyncStorage.setItem(STORAGE_KEY, jsonValue);
+      await saveTrainingMap(dateTypeMap);
     } catch (e) {
       console.error('Error al guardar datos:', e);
     }
@@ -234,7 +215,7 @@ export default function MuscleScreen() {
   const clearAll = async () => {
     setDateTypeMap({});
     try {
-      await AsyncStorage.removeItem(STORAGE_KEY);
+      await AsyncStorage.removeItem(TRAINING_STORAGE_KEY);
     } catch (e) {
       console.error('Error al borrar datos:', e);
     }

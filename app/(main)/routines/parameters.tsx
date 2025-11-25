@@ -4,10 +4,11 @@ import { router } from 'expo-router';
 import { useRoutineBuilder } from '@/Context/RoutineBuilderContext';
 import { createRoutine, addExerciseToRoutine } from '@/utils/routines';
 import { AuthContext } from '@/Context/AuthContext';
+import { registerTrainingEntry } from '@/utils/trainingTracker';
 
 export default function RoutineParametersScreen() {
   const { user } = useContext(AuthContext);
-  const { name, description, exercises, updateExercise, removeExercise, reset } = useRoutineBuilder();
+  const { name, description, exercises, trainingType, updateExercise, removeExercise, reset } = useRoutineBuilder();
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -40,6 +41,7 @@ export default function RoutineParametersScreen() {
           notes: item.notes,
         });
       }
+      await registerTrainingEntry(trainingType);
       Alert.alert('Rutina guardada', 'Tu rutina fue creada con éxito.');
       reset();
       router.replace(`/(main)/routines/${routineId}`);

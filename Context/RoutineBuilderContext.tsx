@@ -14,9 +14,11 @@ export interface RoutineExerciseInput {
 interface RoutineBuilderContextValue {
   name: string;
   description: string;
+  trainingType: string;
   exercises: RoutineExerciseInput[];
   setName: (value: string) => void;
   setDescription: (value: string) => void;
+  setTrainingType: (value: string) => void;
   addExercise: (exercise: Exercise) => void;
   updateExercise: (exerciseId: string, payload: Partial<RoutineExerciseInput>) => void;
   removeExercise: (exerciseId: string) => void;
@@ -28,6 +30,7 @@ const RoutineBuilderContext = createContext<RoutineBuilderContextValue | undefin
 export const RoutineBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [trainingType, setTrainingType] = useState("pierna");
   const [exercises, setExercises] = useState<RoutineExerciseInput[]>([]);
 
   const addExercise = useCallback((exercise: Exercise) => {
@@ -60,6 +63,7 @@ export const RoutineBuilderProvider: React.FC<{ children: React.ReactNode }> = (
   const reset = useCallback(() => {
     setName("");
     setDescription("");
+    setTrainingType("pierna");
     setExercises([]);
   }, []);
 
@@ -67,15 +71,17 @@ export const RoutineBuilderProvider: React.FC<{ children: React.ReactNode }> = (
     () => ({
       name,
       description,
+      trainingType,
       exercises,
       setName,
       setDescription,
+      setTrainingType,
       addExercise,
       updateExercise,
       removeExercise,
       reset,
     }),
-    [name, description, exercises, addExercise, updateExercise, removeExercise, reset]
+    [name, description, trainingType, exercises, addExercise, updateExercise, removeExercise, reset]
   );
 
   return <RoutineBuilderContext.Provider value={value}>{children}</RoutineBuilderContext.Provider>;

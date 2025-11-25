@@ -3,10 +3,12 @@ import { Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, Vie
 import { router } from 'expo-router';
 import { useRoutineBuilder } from '@/Context/RoutineBuilderContext';
 import { AuthContext } from '@/Context/AuthContext';
+import { TRAINING_TYPES } from '@/utils/trainingTracker';
 
 export default function CreateRoutineScreen() {
   const { user } = useContext(AuthContext);
-  const { name, description, setName, setDescription, exercises, reset } = useRoutineBuilder();
+  const { name, description, trainingType, setName, setDescription, setTrainingType, exercises, reset } =
+    useRoutineBuilder();
 
   useEffect(() => {
     reset();
@@ -38,6 +40,23 @@ export default function CreateRoutineScreen() {
           value={name}
           onChangeText={setName}
         />
+
+        <Text style={[styles.label, { marginTop: 16 }]}>Tipo de rutina</Text>
+        <View style={styles.typeList}>
+          {TRAINING_TYPES.map((type) => {
+            const selected = trainingType === type.key;
+            return (
+              <TouchableOpacity
+                key={type.key}
+                style={[styles.typePill, selected && { borderColor: type.color, backgroundColor: `${type.color}20` }]}
+                onPress={() => setTrainingType(type.key)}
+              >
+                <View style={[styles.typeDot, { backgroundColor: type.color }]} />
+                <Text style={[styles.typeText, selected && { color: '#fff', fontWeight: '700' }]}>{type.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
 
         <Text style={[styles.label, { marginTop: 16 }]}>Descripción</Text>
         <TextInput
@@ -95,6 +114,30 @@ const styles = StyleSheet.create({
   label: {
     color: '#B5B4BB',
     marginBottom: 6,
+  },
+  typeList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  typePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#2A2A2C',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2A2A2C',
+  },
+  typeDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  typeText: {
+    color: '#B5B4BB',
   },
   input: {
     backgroundColor: '#2A2A2C',
