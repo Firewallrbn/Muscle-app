@@ -1,10 +1,10 @@
-import { RoutineExerciseDisplay } from '@/types';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, SafeAreaView, StyleSheet, Text, View, FlatList } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/utils/Supabase';
 import { fetchRoutineDetails } from '@/utils/routines';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
+import { RoutineExerciseDisplay } from '@/types';
+import { Theme, useTheme } from '@/Context/ThemeContext';
 
 interface RoutineDetail {
   id: string;
@@ -19,7 +19,8 @@ export default function RoutineDetailScreen() {
   const [items, setItems] = useState<RoutineExerciseDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   useEffect(() => {
     const load = async () => {
@@ -73,7 +74,7 @@ export default function RoutineDetailScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.centered}>
-          <ActivityIndicator color="#FC3058" />
+          <ActivityIndicator color={theme.colors.accent} />
         </View>
       </SafeAreaView>
     );
@@ -132,95 +133,70 @@ export default function RoutineDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0E0E10',
-    paddingHorizontal: 16,
-    paddingTop: 50,
-  },
-  header: {
-    marginBottom: 16,
-  },
-  title: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  subtitle: {
-    color: '#B5B4BB',
-    marginTop: 6,
-  },
-  dateText: {
-    color: '#8C8B91',
-    marginTop: 6,
-  },
-  centered: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  errorText: {
-    color: '#FF647C',
-  },
-  exerciseCard: {
-    backgroundColor: '#1C1C1E',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 12,
-  },
-  exerciseHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 4,
-  },
-  exerciseIndex: {
-    color: '#FC3058',
-    fontWeight: '800',
-  },
-  exerciseName: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-    flex: 1,
-  },
-  exerciseBadge: {
-    color: '#8C8B91',
-  },
-  exerciseMeta: {
-    color: '#B5B4BB',
-  },
-  exerciseNotes: {
-    color: '#8C8B91',
-    marginTop: 6,
-  },
-  footer: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
-  },
-  outlineButton: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 14,
-    padding: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#DADADA',
-  },
-  primaryButton: {
-    flex: 1,
-    backgroundColor: '#FC3058',
-    borderRadius: 14,
-    padding: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  primaryText: {
-    color: '#fff',
-  },
-  outlineText: {
-    color: '#FC3058',
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      paddingHorizontal: 16,
+      paddingTop: 50,
+    },
+    header: {
+      marginBottom: 16,
+    },
+    title: {
+      color: theme.colors.text,
+      fontSize: 24,
+      fontWeight: '700',
+    },
+    subtitle: {
+      color: theme.colors.textSecondary,
+      marginTop: 6,
+    },
+    dateText: {
+      color: theme.colors.textSecondary,
+      marginTop: 6,
+    },
+    centered: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    errorText: {
+      color: theme.colors.accent,
+    },
+    exerciseCard: {
+      backgroundColor: theme.colors.card,
+      borderRadius: 14,
+      padding: 14,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    exerciseHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      marginBottom: 4,
+    },
+    exerciseIndex: {
+      color: theme.colors.accent,
+      fontWeight: '800',
+    },
+    exerciseName: {
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: '700',
+      flex: 1,
+    },
+    exerciseBadge: {
+      color: theme.colors.textSecondary,
+    },
+    exerciseMeta: {
+      color: theme.colors.textSecondary,
+    },
+    exerciseNotes: {
+      color: theme.colors.textSecondary,
+      marginTop: 6,
+    },
+  });

@@ -1,15 +1,18 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
 import { useRoutineBuilder } from '@/Context/RoutineBuilderContext';
 import { createRoutine, addExerciseToRoutine } from '@/utils/routines';
 import { AuthContext } from '@/Context/AuthContext';
 import { registerTrainingEntry } from '@/utils/trainingTracker';
+import { Theme, useTheme } from '@/Context/ThemeContext';
 
 export default function RoutineParametersScreen() {
   const { user } = useContext(AuthContext);
   const { name, description, exercises, trainingType, updateExercise, removeExercise, reset } = useRoutineBuilder();
   const [saving, setSaving] = useState(false);
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const handleSave = async () => {
     if (!user?.id) {
@@ -70,7 +73,7 @@ export default function RoutineParametersScreen() {
             style={styles.input}
             keyboardType="numeric"
             placeholder="3"
-            placeholderTextColor="#7A7A7F"
+            placeholderTextColor={theme.colors.textSecondary}
             value={item.sets ? String(item.sets) : ''}
             onChangeText={(text) => updateExercise(item.exercise.id, { sets: text ? Number(text) : undefined })}
           />
@@ -81,7 +84,7 @@ export default function RoutineParametersScreen() {
             style={styles.input}
             keyboardType="numeric"
             placeholder="12"
-            placeholderTextColor="#7A7A7F"
+            placeholderTextColor={theme.colors.textSecondary}
             value={item.reps ? String(item.reps) : ''}
             onChangeText={(text) => updateExercise(item.exercise.id, { reps: text ? Number(text) : undefined })}
           />
@@ -95,7 +98,7 @@ export default function RoutineParametersScreen() {
             style={styles.input}
             keyboardType="numeric"
             placeholder="40"
-            placeholderTextColor="#7A7A7F"
+            placeholderTextColor={theme.colors.textSecondary}
             value={item.weight ? String(item.weight) : ''}
             onChangeText={(text) => updateExercise(item.exercise.id, { weight: text ? Number(text) : undefined })}
           />
@@ -106,7 +109,7 @@ export default function RoutineParametersScreen() {
             style={styles.input}
             keyboardType="numeric"
             placeholder="90"
-            placeholderTextColor="#7A7A7F"
+            placeholderTextColor={theme.colors.textSecondary}
             value={item.rest_seconds ? String(item.rest_seconds) : ''}
             onChangeText={(text) => updateExercise(item.exercise.id, { rest_seconds: text ? Number(text) : undefined })}
           />
@@ -118,7 +121,7 @@ export default function RoutineParametersScreen() {
         <TextInput
           style={[styles.input, styles.notes]}
           placeholder="Mantén la técnica controlada"
-          placeholderTextColor="#7A7A7F"
+          placeholderTextColor={theme.colors.textSecondary}
           multiline
           value={item.notes ?? ''}
           onChangeText={(text) => updateExercise(item.exercise.id, { notes: text })}
@@ -151,118 +154,123 @@ export default function RoutineParametersScreen() {
           <Text style={styles.outlineText}>Atrás</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.primaryButton, saving && { opacity: 0.6 }]} onPress={handleSave} disabled={saving}>
-          {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryText}>Finalizar rutina</Text>}
+          {saving ? <ActivityIndicator color={theme.colors.text} /> : <Text style={styles.primaryText}>Finalizar rutina</Text>}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0E0E10',
-    paddingHorizontal: 16,
-    paddingTop: 50,
-  },
-  header: {
-    marginBottom: 16,
-  },
-  title: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: '700',
-  },
-  subtitle: {
-    color: '#8C8B91',
-    marginTop: 4,
-  },
-  card: {
-    backgroundColor: '#1C1C1E',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 12,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  cardTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  cardSubtitle: {
-    color: '#8C8B91',
-    marginBottom: 12,
-  },
-  removeText: {
-    color: '#FF647C',
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 10,
-  },
-  inputGroup: {
-    flex: 1,
-  },
-  label: {
-    color: '#B5B4BB',
-    marginBottom: 4,
-  },
-  input: {
-    backgroundColor: '#2A2A2C',
-    color: '#fff',
-    borderRadius: 12,
-    padding: 10,
-  },
-  notes: {
-    height: 70,
-    textAlignVertical: 'top',
-  },
-  centered: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyText: {
-    color: '#8C8B91',
-  },
-  link: {
-    color: '#FC3058',
-    marginTop: 8,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 20,
-    left: 16,
-    right: 16,
-    flexDirection: 'row',
-    gap: 12,
-  },
-  outlineButton: {
-    flex: 1,
-    backgroundColor: '#1C1C1E',
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#2F2F33',
-  },
-  outlineText: {
-    color: '#fff',
-  },
-  primaryButton: {
-    flex: 1,
-    backgroundColor: '#FC3058',
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
-  primaryText: {
-    color: '#fff',
-    fontWeight: '700',
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      paddingHorizontal: 16,
+      paddingTop: 50,
+    },
+    header: {
+      marginBottom: 16,
+    },
+    title: {
+      color: theme.colors.text,
+      fontSize: 22,
+      fontWeight: '700',
+    },
+    subtitle: {
+      color: theme.colors.textSecondary,
+      marginTop: 4,
+    },
+    card: {
+      backgroundColor: theme.colors.card,
+      borderRadius: 14,
+      padding: 14,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    cardTitle: {
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    cardSubtitle: {
+      color: theme.colors.textSecondary,
+      marginBottom: 12,
+    },
+    removeText: {
+      color: theme.colors.accent,
+    },
+    row: {
+      flexDirection: 'row',
+      gap: 12,
+      marginBottom: 10,
+    },
+    inputGroup: {
+      flex: 1,
+    },
+    label: {
+      color: theme.colors.textSecondary,
+      marginBottom: 4,
+    },
+    input: {
+      backgroundColor: theme.colors.input,
+      color: theme.colors.text,
+      borderRadius: 12,
+      padding: 10,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    notes: {
+      height: 70,
+      textAlignVertical: 'top',
+    },
+    centered: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    emptyText: {
+      color: theme.colors.textSecondary,
+    },
+    link: {
+      color: theme.colors.accent,
+      marginTop: 8,
+    },
+    footer: {
+      position: 'absolute',
+      bottom: 20,
+      left: 16,
+      right: 16,
+      flexDirection: 'row',
+      gap: 12,
+    },
+    outlineButton: {
+      flex: 1,
+      backgroundColor: theme.colors.card,
+      paddingVertical: 14,
+      borderRadius: 14,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    outlineText: {
+      color: theme.colors.text,
+    },
+    primaryButton: {
+      flex: 1,
+      backgroundColor: theme.colors.accent,
+      paddingVertical: 14,
+      borderRadius: 14,
+      alignItems: 'center',
+    },
+    primaryText: {
+      color: '#fff',
+      fontWeight: '700',
+    },
+  });

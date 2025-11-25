@@ -2,7 +2,7 @@ import { AuthContext } from '@/Context/AuthContext';
 import { supabase } from '@/utils/Supabase';
 import { fetchWorkoutStats, WorkoutStats } from '@/utils/workouts';
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -16,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
+import { Theme, useTheme } from '@/Context/ThemeContext';
 
 type ProfileData = {
   id: string;
@@ -27,22 +28,6 @@ type ProfileData = {
   weight_goal: number | null;
 };
 
-const ACCENT = '#FC3058';
-const chartConfig = {
-  backgroundGradientFrom: '#1C1C1E',
-  backgroundGradientTo: '#1C1C1E',
-  color: (opacity = 1) => `rgba(252, 48, 88, ${opacity})`,
-  labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-  decimalPlaces: 0,
-  propsForDots: {
-    r: '5',
-    strokeWidth: '2',
-    stroke: '#fff',
-  },
-  propsForBackgroundLines: {
-    stroke: '#2A2A2E',
-  },
-};
 const chartWidth = Dimensions.get('window').width - 32;
 
 const formatDate = (value: string) => {
@@ -64,6 +49,26 @@ export default function ProfileScreen() {
     age: '',
     weight_goal: '',
   });
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const chartConfig = useMemo(
+    () => ({
+      backgroundGradientFrom: theme.colors.card,
+      backgroundGradientTo: theme.colors.card,
+      color: (opacity = 1) => `rgba(252, 48, 88, ${opacity})`,
+      labelColor: () => theme.colors.text,
+      decimalPlaces: 0,
+      propsForDots: {
+        r: '5',
+        strokeWidth: '2',
+        stroke: theme.colors.text,
+      },
+      propsForBackgroundLines: {
+        stroke: theme.colors.border,
+      },
+    }),
+    [theme],
+  );
 
   const loadProfile = async () => {
     if (!user?.id) return;
@@ -331,46 +336,46 @@ export default function ProfileScreen() {
                   style={styles.input}
                   keyboardType="numeric"
                   placeholder="Ej. 72"
-                  placeholderTextColor="#8C8B91"
+                  placeholderTextColor={theme.colors.textSecondary}
                   value={formValues.weight}
                   onChangeText={(text) => setFormValues((prev) => ({ ...prev, weight: text }))}
                 />
 
                 <Text style={styles.modalLabel}>Altura (cm)</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  placeholder="Ej. 175"
-                  placeholderTextColor="#8C8B91"
-                  value={formValues.height}
-                  onChangeText={(text) => setFormValues((prev) => ({ ...prev, height: text }))}
-                />
+                  <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    placeholder="Ej. 175"
+                    placeholderTextColor={theme.colors.textSecondary}
+                    value={formValues.height}
+                    onChangeText={(text) => setFormValues((prev) => ({ ...prev, height: text }))}
+                  />
 
                 <Text style={styles.modalLabel}>Edad</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  placeholder="Ej. 28"
-                  placeholderTextColor="#8C8B91"
-                  value={formValues.age}
-                  onChangeText={(text) => setFormValues((prev) => ({ ...prev, age: text }))}
-                />
+                  <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    placeholder="Ej. 28"
+                    placeholderTextColor={theme.colors.textSecondary}
+                    value={formValues.age}
+                    onChangeText={(text) => setFormValues((prev) => ({ ...prev, age: text }))}
+                  />
 
                 <Text style={styles.modalLabel}>Objetivo de peso (kg)</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  placeholder="Ej. 80"
-                  placeholderTextColor="#8C8B91"
-                  value={formValues.weight_goal}
-                  onChangeText={(text) => setFormValues((prev) => ({ ...prev, weight_goal: text }))}
-                />
+                  <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    placeholder="Ej. 80"
+                    placeholderTextColor={theme.colors.textSecondary}
+                    value={formValues.weight_goal}
+                    onChangeText={(text) => setFormValues((prev) => ({ ...prev, weight_goal: text }))}
+                  />
 
-                <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
-                  <Text style={styles.saveButtonText}>Guardar cambios</Text>
-                </TouchableOpacity>
-              </View>
-            ) : null}
+                  <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
+                    <Text style={styles.saveButtonText}>Guardar cambios</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : null}
 
             <View style={styles.modalDivider} />
             <Text style={styles.modalSubtitle}>Preferencias</Text>
@@ -391,277 +396,304 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0E0E10',
-  },
-  content: {
-    paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 40,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  subtitle: {
-    color: '#8C8B91',
-    marginTop: 4,
-  },
-  menuButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#1C1C1E',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  menuDots: {
-    color: '#fff',
-    fontSize: 22,
-    marginTop: -4,
-  },
-  profileCard: {
-    backgroundColor: '#1C1C1E',
-    padding: 16,
-    borderRadius: 14,
-    marginBottom: 16,
-  },
-  profileName: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  profileEmail: {
-    color: '#8C8B91',
-    marginBottom: 16,
-    marginTop: 4,
-  },
-  profileGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  profileItem: {
-    width: '48%',
-    padding: 12,
-    backgroundColor: '#2A2A2E',
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  profileLabel: {
-    color: '#8C8B91',
-    fontSize: 12,
-  },
-  profileValue: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-    marginTop: 4,
-  },
-  section: {
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 10,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  statCard: {
-    flexBasis: '48%',
-    backgroundColor: '#1C1C1E',
-    padding: 14,
-    borderRadius: 14,
-    marginBottom: 12,
-  },
-  statTitle: {
-    color: '#8C8B91',
-    fontSize: 12,
-  },
-  statValue: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
-    marginTop: 4,
-  },
-  statHelper: {
-    color: '#8C8B91',
-    marginTop: 6,
-  },
-  chartCard: {
-    backgroundColor: '#1C1C1E',
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-  },
-  chart: {
-    borderRadius: 12,
-  },
-  chartFooter: {
-    paddingHorizontal: 12,
-    paddingBottom: 10,
-  },
-  chartFooterText: {
-    color: '#fff',
-    fontWeight: '700',
-  },
-  chartHint: {
-    color: '#8C8B91',
-    marginTop: 4,
-  },
-  sessionCard: {
-    backgroundColor: '#1C1C1E',
-    padding: 14,
-    borderRadius: 14,
-    marginBottom: 10,
-  },
-  sessionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  sessionTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  sessionVolume: {
-    color: ACCENT,
-    fontWeight: '700',
-  },
-  sessionDate: {
-    color: '#8C8B91',
-    marginTop: 6,
-  },
-  sessionSubtitle: {
-    color: '#B5B4BB',
-    marginTop: 2,
-  },
-  placeholderCard: {
-    backgroundColor: '#1C1C1E',
-    padding: 16,
-    borderRadius: 14,
-  },
-  chartPlaceholder: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    rowGap: 8,
-  },
-  placeholderEmoji: {
-    fontSize: 28,
-  },
-  placeholderTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  placeholderText: {
-    color: '#B5B4BB',
-    marginTop: 6,
-    marginBottom: 12,
-  },
-  placeholderButton: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#2A2A2E',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-  },
-  placeholderButtonText: {
-    color: ACCENT,
-    fontWeight: '700',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#121214',
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  modalTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  modalLabel: {
-    color: '#8C8B91',
-    marginTop: 10,
-    marginBottom: 4,
-  },
-  measurementsCard: {
-    backgroundColor: '#1C1C1E',
-    padding: 12,
-    borderRadius: 12,
-  },
-  input: {
-    backgroundColor: '#1C1C1E',
-    color: '#fff',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  saveButton: {
-    marginTop: 16,
-    backgroundColor: ACCENT,
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontWeight: '700',
-  },
-  modalDivider: {
-    height: 1,
-    backgroundColor: '#1C1C1E',
-    marginVertical: 16,
-  },
-  modalSubtitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  placeholderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-  },
-  placeholderRowText: {
-    color: '#fff',
-  },
-  placeholderTag: {
-    color: '#8C8B91',
-    fontSize: 12,
-  },
-  closeButton: {
-    marginTop: 12,
-    alignItems: 'center',
-    paddingVertical: 12,
-    backgroundColor: '#1C1C1E',
-    borderRadius: 12,
-  },
-  closeButtonText: {
-    color: '#fff',
-    fontWeight: '700',
-  },
-});
+const createStyles = (theme: Theme) => {
+  const { colors } = theme;
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      paddingHorizontal: 16,
+      paddingTop: 50,
+      paddingBottom: 40,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 24,
+      fontWeight: '700',
+    },
+    subtitle: {
+      color: colors.textSecondary,
+      marginTop: 4,
+    },
+    menuButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      backgroundColor: colors.card,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    menuDots: {
+      color: colors.text,
+      fontSize: 22,
+      marginTop: -4,
+    },
+    profileCard: {
+      backgroundColor: colors.card,
+      padding: 16,
+      borderRadius: 14,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    profileName: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: '700',
+    },
+    profileEmail: {
+      color: colors.textSecondary,
+      marginBottom: 16,
+      marginTop: 4,
+    },
+    profileGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+    },
+    profileItem: {
+      width: '48%',
+      padding: 12,
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    profileLabel: {
+      color: colors.textSecondary,
+      fontSize: 12,
+    },
+    profileValue: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '700',
+      marginTop: 4,
+    },
+    section: {
+      marginBottom: 16,
+    },
+    sectionTitle: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: '700',
+      marginBottom: 10,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+    },
+    statCard: {
+      flexBasis: '48%',
+      backgroundColor: colors.card,
+      padding: 14,
+      borderRadius: 14,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    statTitle: {
+      color: colors.textSecondary,
+      fontSize: 12,
+    },
+    statValue: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: '700',
+      marginTop: 4,
+    },
+    statHelper: {
+      color: colors.textSecondary,
+      marginTop: 6,
+    },
+    chartCard: {
+      backgroundColor: colors.card,
+      borderRadius: 14,
+      paddingVertical: 12,
+      paddingHorizontal: 8,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    chart: {
+      borderRadius: 12,
+    },
+    chartFooter: {
+      paddingHorizontal: 12,
+      paddingBottom: 10,
+    },
+    chartFooterText: {
+      color: colors.text,
+      fontWeight: '700',
+    },
+    chartHint: {
+      color: colors.textSecondary,
+      marginTop: 4,
+    },
+    sessionCard: {
+      backgroundColor: colors.card,
+      padding: 14,
+      borderRadius: 14,
+      marginBottom: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    sessionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    sessionTitle: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    sessionVolume: {
+      color: colors.accent,
+      fontWeight: '700',
+    },
+    sessionDate: {
+      color: colors.textSecondary,
+      marginTop: 6,
+    },
+    sessionSubtitle: {
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    placeholderCard: {
+      backgroundColor: colors.card,
+      padding: 16,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    chartPlaceholder: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      rowGap: 8,
+    },
+    placeholderEmoji: {
+      fontSize: 28,
+    },
+    placeholderTitle: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    placeholderText: {
+      color: colors.textSecondary,
+      marginTop: 6,
+      marginBottom: 12,
+    },
+    placeholderButton: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.card,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    placeholderButtonText: {
+      color: colors.accent,
+      fontWeight: '700',
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      justifyContent: 'flex-end',
+    },
+    modalContent: {
+      backgroundColor: colors.card,
+      padding: 20,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    modalTitle: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: '700',
+      marginBottom: 12,
+    },
+    modalLabel: {
+      color: colors.textSecondary,
+      marginTop: 10,
+      marginBottom: 4,
+    },
+    measurementsCard: {
+      backgroundColor: colors.card,
+      padding: 12,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    input: {
+      backgroundColor: colors.input,
+      color: colors.text,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    saveButton: {
+      marginTop: 16,
+      backgroundColor: colors.accent,
+      paddingVertical: 12,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    saveButtonText: {
+      color: '#fff',
+      fontWeight: '700',
+    },
+    modalDivider: {
+      height: 1,
+      backgroundColor: colors.border,
+      marginVertical: 16,
+    },
+    modalSubtitle: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '700',
+      marginBottom: 8,
+    },
+    placeholderRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingVertical: 10,
+    },
+    placeholderRowText: {
+      color: colors.text,
+    },
+    placeholderTag: {
+      color: colors.textSecondary,
+      fontSize: 12,
+    },
+    closeButton: {
+      marginTop: 12,
+      alignItems: 'center',
+      paddingVertical: 12,
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    closeButtonText: {
+      color: colors.text,
+      fontWeight: '700',
+    },
+  });
+};

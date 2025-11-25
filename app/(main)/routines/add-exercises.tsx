@@ -7,11 +7,14 @@ import { Exercise } from '@/types';
 import { useExerciseContext } from '@/Context/ExerciseContext';
 import { fetchLikedExercises } from '@/utils/exerciseApi';
 import ExerciseCard from '@/components/ExerciseCard';
+import { Theme, useTheme } from '@/Context/ThemeContext';
 
 export default function AddExercisesScreen() {
   const { user } = useContext(AuthContext);
   const { addExercise, exercises } = useRoutineBuilder();
   const { exercises: apiExercises, loading, error } = useExerciseContext();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [likedIds, setLikedIds] = useState<string[]>([]);
 
@@ -61,7 +64,7 @@ export default function AddExercisesScreen() {
 
       {loading ? (
         <View style={styles.centered}>
-          <ActivityIndicator color="#FC3058" />
+          <ActivityIndicator color={theme.colors.accent} />
         </View>
       ) : error ? (
         <View style={styles.centered}>
@@ -92,73 +95,76 @@ export default function AddExercisesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0E0E10',
-    paddingHorizontal: 16,
-    paddingTop: 50,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: '700',
-  },
-  filterButton: {
-    backgroundColor: '#1C1C1E',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-  },
-  filterText: {
-    color: '#FC3058',
-    fontWeight: '600',
-  },
-  centered: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  errorText: {
-    color: '#FF647C',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  card: {
-    marginBottom: 10,
-  },
-  footer: {
-    flexDirection: 'row',
-    gap: 12,
-    paddingVertical: 16,
-  },
-  outlineButton: {
-    flex: 1,
-    backgroundColor: '#1C1C1E',
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#2F2F33',
-  },
-  outlineText: {
-    color: '#fff',
-  },
-  primaryButton: {
-    flex: 1,
-    backgroundColor: '#FC3058',
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
-  primaryText: {
-    color: '#fff',
-    fontWeight: '700',
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      paddingHorizontal: 16,
+      paddingTop: 50,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    title: {
+      color: theme.colors.text,
+      fontSize: 22,
+      fontWeight: '700',
+    },
+    filterButton: {
+      backgroundColor: theme.colors.card,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    filterText: {
+      color: theme.colors.accent,
+      fontWeight: '600',
+    },
+    centered: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    errorText: {
+      color: theme.colors.accent,
+      textAlign: 'center',
+      marginBottom: 8,
+    },
+    card: {
+      marginBottom: 10,
+    },
+    footer: {
+      flexDirection: 'row',
+      gap: 12,
+      paddingVertical: 16,
+    },
+    outlineButton: {
+      flex: 1,
+      backgroundColor: theme.colors.card,
+      paddingVertical: 14,
+      borderRadius: 14,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    outlineText: {
+      color: theme.colors.text,
+    },
+    primaryButton: {
+      flex: 1,
+      backgroundColor: theme.colors.accent,
+      paddingVertical: 14,
+      borderRadius: 14,
+      alignItems: 'center',
+    },
+    primaryText: {
+      color: '#fff',
+      fontWeight: '700',
+    },
+  });

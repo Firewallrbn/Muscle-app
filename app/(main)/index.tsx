@@ -1,11 +1,14 @@
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Link, router, useFocusEffect } from 'expo-router';
 import { AuthContext } from '@/Context/AuthContext';
+import { Theme, useTheme } from '@/Context/ThemeContext';
 import { fetchUserRoutines, Routine } from '@/utils/routines';
 
 export default function RoutinesScreen() {
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -61,11 +64,11 @@ export default function RoutinesScreen() {
       </View>
 
       {loading ? (
-        <View style={styles.centered}> 
-          <ActivityIndicator color="#FC3058" />
+        <View style={styles.centered}>
+          <ActivityIndicator color={theme.colors.accent} />
         </View>
       ) : error ? (
-        <View style={styles.centered}> 
+        <View style={styles.centered}>
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity onPress={loadRoutines}>
             <Text style={styles.retryText}>Reintentar</Text>
@@ -91,80 +94,83 @@ export default function RoutinesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0E0E10',
-    paddingHorizontal: 16,
-    paddingTop: 50,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  title: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  subtitle: {
-    color: '#8C8B91',
-    marginTop: 4,
-  },
-  createButton: {
-    backgroundColor: '#FC3058',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 12,
-  },
-  createButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorText: {
-    color: '#FF647C',
-    marginBottom: 8,
-  },
-  retryText: {
-    color: '#FC3058',
-  },
-  emptyText: {
-    color: '#8C8B91',
-  },
-  linkText: {
-    color: '#FC3058',
-    marginTop: 8,
-  },
-  card: {
-    backgroundColor: '#1C1C1E',
-    padding: 16,
-    borderRadius: 14,
-    marginBottom: 12,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  cardTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  cardDate: {
-    color: '#8C8B91',
-    fontSize: 12,
-  },
-  cardDescription: {
-    color: '#B5B4BB',
-    marginTop: 4,
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      paddingHorizontal: 16,
+      paddingTop: 50,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 20,
+    },
+    title: {
+      color: theme.colors.text,
+      fontSize: 24,
+      fontWeight: '700',
+    },
+    subtitle: {
+      color: theme.colors.textSecondary,
+      marginTop: 4,
+    },
+    createButton: {
+      backgroundColor: theme.colors.accent,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 12,
+    },
+    createButtonText: {
+      color: '#fff',
+      fontWeight: '600',
+    },
+    centered: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    errorText: {
+      color: theme.colors.accent,
+      marginBottom: 8,
+    },
+    retryText: {
+      color: theme.colors.accent,
+    },
+    emptyText: {
+      color: theme.colors.textSecondary,
+    },
+    linkText: {
+      color: theme.colors.accent,
+      marginTop: 8,
+    },
+    card: {
+      backgroundColor: theme.colors.card,
+      padding: 16,
+      borderRadius: 14,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 6,
+    },
+    cardTitle: {
+      color: theme.colors.text,
+      fontSize: 18,
+      fontWeight: '700',
+    },
+    cardDate: {
+      color: theme.colors.textSecondary,
+      fontSize: 12,
+    },
+    cardDescription: {
+      color: theme.colors.textSecondary,
+      marginTop: 4,
+    },
+  });
