@@ -1,109 +1,215 @@
 import { AuthContext } from "@/Context/AuthContext";
+import { Theme, useTheme } from "@/Context/ThemeContext";
 import { useRouter } from "expo-router";
-import { useContext, useState } from "react";
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useContext, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
 
-export default function Index() {
+export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const context = useContext(AuthContext);
   const router = useRouter();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const handleLogin = async () => {
     const cleanEmail = email.trim();
-      const cleanPassword = password.trim();
+    const cleanPassword = password.trim();
+    
+    if (!cleanEmail || !cleanPassword) {
+      alert("Por favor completa todos los campos.");
+      return;
+    }
+    
+    setLoading(true);
     const success = await context.login(cleanEmail, cleanPassword);
+    setLoading(false);
+    
     if (success) {
-        router.replace("/(main)/exercises");
-        console.log("Login exitoso");
+      router.replace("/(main)/exercises");
     } else {
       alert("Error al iniciar sesión. Revisa tus credenciales.");
-      console.log("No sirve");
-      
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>MUSCLE</Text>
-      <Image source={require('../../assets/images/Coco.png')} style={styles.Logo} />
-      <Text style={styles.descrition}>Aplicacion para hacer ejercicio</Text>
-      <Text style={styles.text}>Usuario</Text>
-      <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholder="Usuario"/>
-      <Text style={styles.text}>Contraseña</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry={true}
-      />
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.header}>
+          <Text style={styles.title}>MUSCLE</Text>
+          <Text style={styles.subtitle}>Tu compañero de entrenamiento</Text>
+        </View>
 
-      <TouchableOpacity style={styles.buttonlogin} onPress={handleLogin}>
-        <Text style={styles.text}>Iniciar sesion</Text>
-      </TouchableOpacity>
+        <View style={styles.formCard}>
+          <Text style={styles.formTitle}>Iniciar sesión</Text>
+          
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Correo electrónico</Text>
+            <TextInput 
+              style={styles.input} 
+              value={email} 
+              onChangeText={setEmail} 
+              placeholder="tu@email.com"
+              placeholderTextColor={theme.colors.textSecondary}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              autoCorrect={false}
+            />
+          </View>
 
-      <Text style={styles.descrition}>¿No tienes cuenta? Registrate</Text>
-      <TouchableOpacity style={styles.buttonlogin}>
-        <Text style={styles.text} onPress={() => router.push("/(auth)/register")}>Registrate</Text>
-      </TouchableOpacity>
-    </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Contraseña</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="••••••••"
+              placeholderTextColor={theme.colors.textSecondary}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+          </View>
+
+          <TouchableOpacity onPress={() => router.push("/(auth)/resetpassword")}>
+            <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.primaryButton, loading && styles.buttonDisabled]} 
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.primaryButtonText}>Iniciar sesión</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>¿No tienes cuenta?</Text>
+          <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
+            <Text style={styles.footerLink}>Regístrate aquí</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f5f6',
-     alignItems: "center",
-  },
-  blacktext:{
-    color: 'black',
-    fontSize: 20
-  },
-  buttonlogin:{
-    backgroundColor: '#FC3058',
-    color: 'white',
-    padding: 10,
-    borderRadius: 10,
-    width: '50%',
-    alignItems: "center"
-  }
-  ,
-  text:{
-    fontSize: 20,
-    justifyContent: "flex-start",
-    color: 'black'
-  },
-  descrition:{
-    fontSize: 15,
-    fontStyle: "italic",
-    color: 'black',
-    marginTop: 20
-  },
-  Logo:{
-    width: 100,
-    height: 100,
-    margin: 20
-  },
-  title:{
-    fontSize: 40,
-    fontWeight: "bold",
-    marginTop: 50,
-    marginBottom: 20,
-    color: '#FC3058'
-  },
-  input:{
-    borderColor: 'gray',
-    color: 'black',
-    borderWidth: 1,
-    width: '80%',
-    height: 40,
-    marginTop: 20,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    borderBlockColor: 'blue'
-  }
-})
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      paddingHorizontal: 24,
+      paddingVertical: 40,
+    },
+    header: {
+      alignItems: 'center',
+      marginBottom: 40,
+    },
+    title: {
+      fontSize: 42,
+      fontWeight: '800',
+      color: '#FFFFFF',
+      letterSpacing: 3,
+    },
+    subtitle: {
+      fontSize: 16,
+      color: theme.colors.textSecondary,
+      marginTop: 8,
+    },
+    formCard: {
+      backgroundColor: theme.colors.card,
+      borderRadius: 24,
+      padding: 24,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    formTitle: {
+      fontSize: 22,
+      fontWeight: '700',
+      color: theme.colors.text,
+      marginBottom: 24,
+    },
+    inputGroup: {
+      marginBottom: 16,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.colors.textSecondary,
+      marginBottom: 8,
+    },
+    input: {
+      backgroundColor: theme.colors.input,
+      color: theme.colors.text,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      fontSize: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    forgotPassword: {
+      color: theme.colors.accent,
+      fontSize: 14,
+      fontWeight: '600',
+      textAlign: 'right',
+      marginBottom: 20,
+      marginTop: 4,
+    },
+    primaryButton: {
+      backgroundColor: theme.colors.accent,
+      paddingVertical: 16,
+      borderRadius: 14,
+      alignItems: 'center',
+    },
+    buttonDisabled: {
+      opacity: 0.7,
+    },
+    primaryButtonText: {
+      color: '#fff',
+      fontSize: 17,
+      fontWeight: '700',
+    },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: 32,
+      gap: 6,
+    },
+    footerText: {
+      color: theme.colors.textSecondary,
+      fontSize: 15,
+    },
+    footerLink: {
+      color: theme.colors.accent,
+      fontSize: 15,
+      fontWeight: '700',
+    },
+  });
