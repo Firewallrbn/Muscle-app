@@ -1,23 +1,84 @@
-🏋️‍♂️ Muscle App
+# Muscle App
 
-Aplicación móvil para gimnasio desarrollada con React Native y Supabase.
-Diseñada para ofrecer una experiencia moderna, motivante y personalizada para los usuarios que desean optimizar su entrenamiento y progreso físico.
+## 1. Project Overview
+Muscle App is a mobile fitness application built with React Native and Expo. It allows users to create workout routines, explore exercises, track progress, and interact with an AI-powered virtual coach. The project was developed as an MVP as required by the Third Term Project guidelines.
 
-🔗 Diseño en Figma:
-👉 [Ver prototipo interactivo](https://www.figma.com/design/6pzZINx7GDpkEqFhjb7CHO/MUSCLE-APP?node-id=59-1434&t=moXK6gtUg0xBB6Yd-0)
+## 2. Features
+### 2.1 Core Features
+- User authentication (Supabase)
+- Exercise search (ExerciseDB API)
+- Routine creation
+- Workout session tracking
+- Progress charts
+- AI Assistant (OpenAI Llama 3)
+- Local caching with AsyncStorage
 
-🚀 Características principales
+### 2.2 Technical Features
+- High-fidelity UI following Figma
+- React Navigation tab system
+- External API integration
+- External libraries (chart-kit, AsyncStorage, etc.)
 
-🧠 M.A.X. (Muscle Assistant eXperience): Chat con IA para recomendaciones personalizadas de entrenamiento.
+## 3. Architecture
+- Frontend: React Native + Expo
+- Backend: Supabase (Authentication, Database)
+- External API: ExerciseDB (RapidAPI)
+- AI: OpenAI Llama 3
+- Local Storage: AsyncStorage
+- State Management: Context API
 
-📊 Dashboard con métricas semanales (workouts, progreso, récords personales).
+## 4. Technologies Used
+- React Native
+- Expo
+- Supabase
+- OpenAI API
+- RapidAPI ExerciseDB
+- React Navigation
+- React Native Chart Kit
+- TypeScript
 
-🏋️ Ejercicios con detalles de peso, repeticiones y tiempo.
+## 5. Installation
 
-🧩 Rutinas personalizadas en formato de “chips” para fácil acceso y edición.
+### 5.1 Clone Repository
+git clone https://github.com/Firewallrbn/Muscle-app
 
-💬 M.A.X+ (versión premium) con funciones avanzadas de análisis, rutinas inteligentes y soporte extendido.
+shell
+Copiar código
 
-🔐 Autenticación con Supabase (registro, login, recuperación de contraseña).
+### 5.2 Install Dependencies
+npm install
 
-☁️ Base de datos en tiempo real y almacenamiento en la nube para perfiles, rutinas e historial.
+bash
+Copiar código
+
+### 5.3 Environment Variables
+Create a `.env` file:
+EXPO_PUBLIC_SUPABASE_URL=
+EXPO_PUBLIC_SUPABASE_ANON_KEY=
+EXPO_PUBLIC_RAPIDAPI_KEY=
+OPENAI_API_KEY=
+
+shell
+Copiar código
+
+### 5.4 Run Application
+npx expo start
+
+shell
+Copiar código
+
+## 6. Folder Structure
+/app
+/components
+/Context
+/utils
+
+bash
+Copiar código
+
+## 7. Documentation
+Full documentation available in GitHub Wiki:
+https://github.com/Firewallrbn/Muscle-app/wiki
+
+## 8. License
+MIT License
