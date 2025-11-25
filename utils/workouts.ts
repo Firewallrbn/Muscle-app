@@ -28,6 +28,8 @@ export type WorkoutStats = {
   };
   weeklyActivity: { label: string; count: number }[];
   lastSessions: { id: string; started_at: string; finished_at: string | null; volume: number }[];
+  volumeOverTime: { label: string; volume: number }[];
+  setsPerDay: { label: string; sets: number }[];
 };
 
 const parseNumber = (value: number | null) => (typeof value === 'number' ? value : 0);
@@ -134,11 +136,44 @@ export const fetchWorkoutStats = async (profileId: string): Promise<WorkoutStats
     };
   });
 
+  // Volumen a lo largo del tiempo (últimas 7 sesiones)
+  const volumeOverTime = sessions.slice(0, 7).reverse().map((session) => {
+    const sessionSets = sets.filter((set) => set.session_id === session.id);
+    const sessionVolume = sessionSets.reduce((acc, set) => acc + parseNumber(set.weight) * parseNumber(set.reps), 0);
+    const date = new Date(session.started_at);
+    return {
+      label: `${date.getDate()}/${date.getMonth() + 1}`,
+      volume: sessionVolume,
+    };
+  });
+
+  // Sets completados por día (últimos 7 días)
+  const today = new Date();
+  const setsPerDay: { label: string; sets: number }[] = [];
+  const dayLabels = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+  
+  for (let i = 6; i >= 0; i -= 1) {
+    const day = new Date();
+    day.setDate(today.getDate() - i);
+    const dayKey = day.toISOString().slice(0, 10);
+    
+    const daySessions = sessions.filter((s) => s.started_at.slice(0, 10) === dayKey);
+    const daySessionIds = daySessions.map((s) => s.id);
+    const daySets = sets.filter((set) => daySessionIds.includes(set.session_id));
+    
+    setsPerDay.push({
+      label: dayLabels[day.getDay()],
+      sets: daySets.length,
+    });
+  }
+
   return {
     sessionsThisWeek,
     totalVolume,
     topExercise,
     weeklyActivity: buildWeeklyActivity(sessions),
     lastSessions,
+    volumeOverTime,
+    setsPerDay,
   };
 };

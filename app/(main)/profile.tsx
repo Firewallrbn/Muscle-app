@@ -16,7 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
+import { BarChart, LineChart, ProgressChart } from 'react-native-chart-kit';
 
 type ProfileData = {
   id: string;
@@ -238,6 +238,180 @@ export default function ProfileScreen() {
     );
   };
 
+  const renderVolumeOverTime = () => {
+    if (!stats?.volumeOverTime?.length || stats.volumeOverTime.every(v => v.volume === 0)) {
+      return (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Volumen por sesión</Text>
+          <View style={[styles.placeholderCard, styles.chartPlaceholder]}>
+            <Text style={styles.placeholderEmoji}>📈</Text>
+            <Text style={styles.placeholderTitle}>Sin datos de volumen</Text>
+            <Text style={styles.placeholderText}>
+              Completa entrenamientos con peso y repeticiones para ver tu progreso de volumen.
+            </Text>
+          </View>
+        </View>
+      );
+    }
+
+    const chartData = {
+      labels: stats.volumeOverTime.map((d) => d.label),
+      datasets: [
+        {
+          data: stats.volumeOverTime.map((d) => d.volume || 0),
+          color: (opacity = 1) => `rgba(10, 132, 255, ${opacity})`,
+          strokeWidth: 2,
+        },
+      ],
+    };
+
+    return (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Volumen por sesión</Text>
+        <View style={styles.chartCard}>
+          <LineChart
+            data={chartData}
+            width={chartWidth}
+            height={180}
+            chartConfig={{
+              ...chartConfig,
+              color: (opacity = 1) => `rgba(10, 132, 255, ${opacity})`,
+            }}
+            fromZero
+            bezier
+            style={styles.chart}
+            segments={3}
+          />
+          <View style={styles.chartFooter}>
+            <Text style={styles.chartFooterText}>Últimas sesiones</Text>
+            <Text style={styles.chartHint}>Peso × reps por entrenamiento (kg)</Text>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
+  const renderWeightProgress = () => {
+    const currentWeight = profile?.weight;
+    const goalWeight = profile?.weight_goal;
+
+    if (!currentWeight || !goalWeight) {
+      return (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Progreso de peso</Text>
+          <View style={[styles.placeholderCard, styles.chartPlaceholder]}>
+            <Text style={styles.placeholderEmoji}>⚖️</Text>
+            <Text style={styles.placeholderTitle}>Configura tu objetivo</Text>
+            <Text style={styles.placeholderText}>
+              Añade tu peso actual y objetivo en ajustes para ver tu progreso.
+            </Text>
+          </View>
+        </View>
+      );
+    }
+
+    // Calcular progreso (si el objetivo es bajar o subir de peso)
+    const isLosing = goalWeight < currentWeight;
+    const startWeight = isLosing ? currentWeight * 1.1 : currentWeight * 0.9; // Estimado inicial
+    const totalChange = Math.abs(goalWeight - startWeight);
+    const currentChange = Math.abs(currentWeight - startWeight);
+    const progress = Math.min(Math.max(currentChange / totalChange, 0), 1);
+    
+    const difference = Math.abs(currentWeight - goalWeight);
+    const isAtGoal = difference <= 1;
+
+    return (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Progreso de peso</Text>
+        <View style={styles.chartCard}>
+          <View style={styles.progressChartContainer}>
+            <ProgressChart
+              data={{
+                labels: ['Progreso'],
+                data: [isAtGoal ? 1 : progress],
+              }}
+              width={chartWidth}
+              height={160}
+              strokeWidth={16}
+              radius={50}
+              chartConfig={{
+                ...chartConfig,
+                color: (opacity = 1) => isAtGoal 
+                  ? `rgba(76, 217, 100, ${opacity})`
+                  : `rgba(252, 48, 88, ${opacity})`,
+              }}
+              hideLegend
+              style={styles.chart}
+            />
+            <View style={styles.progressOverlay}>
+              <Text style={styles.progressPercentage}>
+                {isAtGoal ? '🎉' : `${Math.round(progress * 100)}%`}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.weightInfoRow}>
+            <View style={styles.weightInfoItem}>
+              <Text style={styles.weightInfoLabel}>Actual</Text>
+              <Text style={styles.weightInfoValue}>{currentWeight} kg</Text>
+            </View>
+            <View style={styles.weightInfoDivider} />
+            <View style={styles.weightInfoItem}>
+              <Text style={styles.weightInfoLabel}>Objetivo</Text>
+              <Text style={[styles.weightInfoValue, { color: theme.colors.accent }]}>{goalWeight} kg</Text>
+            </View>
+            <View style={styles.weightInfoDivider} />
+            <View style={styles.weightInfoItem}>
+              <Text style={styles.weightInfoLabel}>Faltan</Text>
+              <Text style={styles.weightInfoValue}>{difference.toFixed(1)} kg</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
+  const renderSetsPerDay = () => {
+    if (!stats?.setsPerDay?.length || stats.setsPerDay.every(d => d.sets === 0)) {
+      return null; // No mostrar si no hay datos
+    }
+
+    const chartData = {
+      labels: stats.setsPerDay.map((d) => d.label),
+      datasets: [
+        {
+          data: stats.setsPerDay.map((d) => d.sets || 0),
+        },
+      ],
+    };
+
+    return (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Sets por día</Text>
+        <View style={styles.chartCard}>
+          <BarChart
+            data={chartData}
+            width={chartWidth}
+            height={180}
+            yAxisLabel=""
+            yAxisSuffix=""
+            chartConfig={{
+              ...chartConfig,
+              color: (opacity = 1) => `rgba(255, 159, 64, ${opacity})`,
+              barPercentage: 0.6,
+            }}
+            fromZero
+            showValuesOnTopOfBars
+            style={styles.chart}
+          />
+          <View style={styles.chartFooter}>
+            <Text style={styles.chartFooterText}>Últimos 7 días</Text>
+            <Text style={styles.chartHint}>Total de sets completados por día</Text>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
   const renderMacroPlaceholder = () => (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Macros diarios</Text>
@@ -313,6 +487,9 @@ export default function ProfileScreen() {
         </View>
 
         {renderWeeklyActivity()}
+        {renderVolumeOverTime()}
+        {renderWeightProgress()}
+        {renderSetsPerDay()}
         {renderRecentSessions()}
         {renderMacroPlaceholder()}
       </ScrollView>
@@ -749,6 +926,51 @@ const createStyles = (theme: Theme) => {
     },
     themeButtonTextActive: {
       color: '#fff',
+    },
+    // Estilos para charts adicionales
+    progressChartContainer: {
+      position: 'relative',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    progressOverlay: {
+      position: 'absolute',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    progressPercentage: {
+      fontSize: 28,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    weightInfoRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 8,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      marginTop: 8,
+    },
+    weightInfoItem: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    weightInfoLabel: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      marginBottom: 4,
+    },
+    weightInfoValue: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    weightInfoDivider: {
+      width: 1,
+      height: 30,
+      backgroundColor: colors.border,
     },
   });
 };
