@@ -1,4 +1,4 @@
-import { Exercise } from "@/types";
+import { Exercise, ExerciseDetails } from "@/types";
 import { supabase } from "./Supabase";
 
 const API_BASE_URL = "https://exercisedb.p.rapidapi.com";
@@ -110,6 +110,46 @@ export const fetchExerciseById = async (exerciseId: string): Promise<Exercise> =
     return mapApiExercise(payload);
   } catch (err) {
     console.error('fetchExerciseById error:', err);
+    throw err;
+  }
+};
+
+export const fetchExerciseDetails = async (exerciseId: string): Promise<ExerciseDetails> => {
+  try {
+    // Si el ID ya está desnormalizado (corto como "0003"), úsalo directamente
+    const normalizedId = exerciseId.includes("-") 
+      ? denormalizeExerciseId(exerciseId) 
+      : exerciseId.padStart(4, "0");
+
+    const response = await fetch(
+      `${API_BASE_URL}/exercises/exercise/${normalizedId}`,
+      {
+        headers: buildHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch exercise details: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    
+    return {
+      id: payload.id?.toString(),
+      name: payload.name ?? "Unknown exercise",
+      bodyPart: payload.bodyPart ?? "Unknown",
+      target: payload.target ?? "Unknown",
+      equipment: payload.equipment ?? null,
+      gifUrl: payload.gifUrl,
+      imageUrl: payload.image ?? payload.gifUrl ?? (payload.id ? buildExerciseImageUrl(payload.id) : undefined),
+      secondaryMuscles: payload.secondaryMuscles ?? [],
+      instructions: payload.instructions ?? [],
+      description: payload.description ?? "",
+      difficulty: payload.difficulty ?? "intermediate",
+      category: payload.category ?? "strength",
+    };
+  } catch (err) {
+    console.error('fetchExerciseDetails error:', err);
     throw err;
   }
 };

@@ -2,7 +2,7 @@ import { Theme, useTheme } from '@/Context/ThemeContext';
 import { Exercise } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const placeholderImage = require('../assets/images/icon.png');
 
@@ -10,15 +10,19 @@ interface ExerciseCardProps {
     exercise: Exercise;
     liked?: boolean;
     onToggleLike?: (exerciseId: string) => void;
+    onPress?: (exercise: Exercise) => void;
 }
 
-const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, liked = false, onToggleLike }) => {
+const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, liked = false, onToggleLike, onPress }) => {
     const { theme } = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const [usePlaceholder, setUsePlaceholder] = useState(!exercise.imageUrl && !exercise.gifUrl);
     
+    const CardWrapper = onPress ? TouchableOpacity : View;
+    const cardWrapperProps = onPress ? { onPress: () => onPress(exercise), activeOpacity: 0.7 } : {};
+    
     return (
-        <View style={styles.card}>
+        <CardWrapper style={styles.card} {...cardWrapperProps}>
             <Image
                 source={
                     usePlaceholder
@@ -45,12 +49,27 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, liked = false, on
                     ) : null}
                 </View>
                 <View style={styles.metaRow}>
-                    <Text style={styles.metaText}>{exercise.bodyPart}</Text>
-                    <Text style={styles.dot}>•</Text>
-                    <Text style={[styles.metaText, styles.metaTextLast]}>{exercise.target}</Text>
+                    <View style={styles.chip}>
+                        <Text style={styles.chipText}>{exercise.bodyPart}</Text>
+                    </View>
+                    <View style={styles.chip}>
+                        <Text style={styles.chipText}>{exercise.target}</Text>
+                    </View>
+                    {exercise.equipment && (
+                        <View style={[styles.chip, styles.chipEquipment]}>
+                            <Ionicons name="barbell-outline" size={12} color={theme.colors.secondary} />
+                            <Text style={[styles.chipText, styles.chipTextEquipment]}>{exercise.equipment}</Text>
+                        </View>
+                    )}
                 </View>
+                {onPress && (
+                    <View style={styles.tapHint}>
+                        <Text style={styles.tapHintText}>Toca para ver detalles</Text>
+                        <Ionicons name="chevron-forward" size={14} color={theme.colors.textSecondary} />
+                    </View>
+                )}
             </View>
-        </View>
+        </CardWrapper>
     );
 };
 
@@ -88,27 +107,47 @@ const createStyles = (theme: Theme) => {
             fontWeight: '600',
             color: colors.text,
             textTransform: 'capitalize',
-            marginBottom: 8,
+            marginBottom: 12,
             flex: 1,
             marginRight: 12,
         },
         metaRow: {
             flexDirection: 'row',
             alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 8,
         },
-        metaText: {
-            fontSize: 14,
-            color: colors.textSecondary,
+        chip: {
+            backgroundColor: colors.accent + '15',
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 20,
+        },
+        chipText: {
+            fontSize: 12,
+            color: colors.accent,
             textTransform: 'capitalize',
-            marginRight: 6,
+            fontWeight: '600',
         },
-        metaTextLast: {
-            marginRight: 0,
+        chipEquipment: {
+            backgroundColor: colors.secondary + '15',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
         },
-        dot: {
-            fontSize: 14,
-            color: colors.border,
-            marginRight: 6,
+        chipTextEquipment: {
+            color: colors.secondary,
+        },
+        tapHint: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            marginTop: 12,
+            gap: 4,
+        },
+        tapHintText: {
+            fontSize: 12,
+            color: colors.textSecondary,
         },
     });
 };

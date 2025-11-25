@@ -1,11 +1,12 @@
 import Camera from '@/components/Camera';
 import CategoryChip from '@/components/CategoryChip';
 import ExerciseCard from '@/components/ExerciseCard';
+import ExerciseDetailModal from '@/components/ExerciseDetailModal';
 import { AuthContext } from '@/Context/AuthContext';
 import { useExerciseContext } from '@/Context/ExerciseContext';
 import { useTheme } from '@/Context/ThemeContext';
-import { Exercise } from '@/types';
-import { fetchLikedExercises, normalizeExerciseId, toggleLike } from '@/utils/exerciseApi';
+import { Exercise, ExerciseDetails } from '@/types';
+import { fetchExerciseDetails, fetchLikedExercises, normalizeExerciseId, toggleLike } from '@/utils/exerciseApi';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
@@ -32,6 +33,11 @@ const ExercisesScreen: React.FC = () => {
     const [likedIds, setLikedIds] = useState<string[]>([]);
     const [showFavorites, setShowFavorites] = useState(false);
     const [processingLike, setProcessingLike] = useState(false);
+    
+    // Estado para el modal de detalles
+    const [selectedExercise, setSelectedExercise] = useState<ExerciseDetails | null>(null);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [loadingDetails, setLoadingDetails] = useState(false);
 
     const categories = useMemo(() => ['all', ...bodyParts], [bodyParts]);
 
@@ -124,6 +130,35 @@ const handleToggleFavorite = useCallback(
   [user?.id, processingLike],
 );
 
+    const handleExercisePress = useCallback(async (exercise: Exercise) => {
+        setModalVisible(true);
+        setLoadingDetails(true);
+        setSelectedExercise(null);
+        
+        try {
+            const details = await fetchExerciseDetails(exercise.id);
+            setSelectedExercise(details);
+        } catch (err) {
+            console.error('Error fetching exercise details:', err);
+            // Fallback: usar la info básica que ya tenemos
+            setSelectedExercise({
+                ...exercise,
+                secondaryMuscles: [],
+                instructions: [],
+                description: '',
+                difficulty: 'intermediate',
+                category: 'strength',
+            });
+        } finally {
+            setLoadingDetails(false);
+        }
+    }, []);
+
+    const handleCloseModal = useCallback(() => {
+        setModalVisible(false);
+        setSelectedExercise(null);
+    }, []);
+
 
     const renderExercise = useCallback(
         ({ item }: { item: Exercise }) => {
@@ -132,10 +167,11 @@ const handleToggleFavorite = useCallback(
                     exercise={item}
                     liked={likedIds.includes(normalizeExerciseId(item.id))}
                     onToggleLike={handleToggleFavorite}
+                    onPress={handleExercisePress}
                 />
             );
         },
-        [handleToggleFavorite, likedIds],
+        [handleToggleFavorite, likedIds, handleExercisePress],
     );
 
     const keyExtractor = useCallback((item: Exercise) => item.id, []);
@@ -237,6 +273,14 @@ const handleToggleFavorite = useCallback(
                     </View>
                 ) : null}
                 showsVerticalScrollIndicator={false}
+            />
+            
+            {/* Modal de detalles del ejercicio */}
+            <ExerciseDetailModal
+                visible={modalVisible}
+                exercise={selectedExercise}
+                loading={loadingDetails}
+                onClose={handleCloseModal}
             />
         </SafeAreaView>
     );

@@ -8,6 +8,14 @@ export interface Exercise {
   imageUrl?: string;
 }
 
+export interface ExerciseDetails extends Exercise {
+  secondaryMuscles?: string[];
+  instructions?: string[];
+  description?: string;
+  difficulty?: string;
+  category?: string;
+}
+
 export interface RoutineExerciseDisplay {
   id: string;
   position: number;
