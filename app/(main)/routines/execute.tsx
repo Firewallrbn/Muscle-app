@@ -40,6 +40,7 @@ export default function ExecuteRoutineScreen() {
   const styles = createStyles(theme);
   const [exercises, setExercises] = useState<ExerciseSet[]>([]);
   const [loading, setLoading] = useState(true);
+  const [startedAt] = useState<Date>(new Date()); // Guardar tiempo de inicio
   const [execution, setExecution] = useState<ExecutionState>({
     exerciseIndex: 0,
     currentSet: 1,
@@ -147,7 +148,28 @@ export default function ExecuteRoutineScreen() {
     return () => clearInterval(interval);
   }, [execution.isResting, execution.restTimeLeft]);
 
-  const handleSetComplete = () => {
+  // Función para guardar la sesión de entrenamiento
+  const saveWorkoutSession = async () => {
+    try {
+      const { error } = await supabase.from('workout_sessions').insert({
+        profile_id: user?.id,
+        routine_id: id,
+        started_at: startedAt.toISOString(),
+        finished_at: new Date().toISOString(),
+      });
+
+      if (error) {
+        console.error('Error guardando sesión:', error);
+        throw error;
+      }
+      
+      console.log('Sesión de entrenamiento guardada correctamente');
+    } catch (err) {
+      console.error('Error al guardar la sesión de entrenamiento:', err);
+    }
+  };
+
+  const handleSetComplete = async () => {
     const currentExercise = exercises[execution.exerciseIndex];
 
     // Si no es el último set del ejercicio
@@ -170,7 +192,8 @@ export default function ExecuteRoutineScreen() {
           currentSet: 1,
         }));
       } else {
-        // Fin de la rutina
+        // Fin de la rutina - Guardar sesión de entrenamiento
+        await saveWorkoutSession();
         Alert.alert('¡Felicidades!', 'Completaste la rutina.', [
           { text: 'Volver', onPress: () => router.back() },
         ]);

@@ -1,11 +1,10 @@
-import React, { useContext, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { router } from 'expo-router';
-import { useRoutineBuilder } from '@/Context/RoutineBuilderContext';
-import { createRoutine, addExerciseToRoutine } from '@/utils/routines';
 import { AuthContext } from '@/Context/AuthContext';
-import { registerTrainingEntry } from '@/utils/trainingTracker';
+import { useRoutineBuilder } from '@/Context/RoutineBuilderContext';
 import { Theme, useTheme } from '@/Context/ThemeContext';
+import { addExerciseToRoutine, createRoutine } from '@/utils/routines';
+import { router } from 'expo-router';
+import { useContext, useMemo, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function RoutineParametersScreen() {
   const { user } = useContext(AuthContext);
@@ -31,7 +30,7 @@ export default function RoutineParametersScreen() {
 
     setSaving(true);
     try {
-      const routineId = await createRoutine(user.id, name, description);
+      const routineId = await createRoutine(user.id, name, description, trainingType);
       for (const item of exercises) {
         await addExerciseToRoutine({
           routine_id: routineId,
@@ -44,7 +43,6 @@ export default function RoutineParametersScreen() {
           notes: item.notes,
         });
       }
-      await registerTrainingEntry(trainingType);
       Alert.alert('Rutina guardada', 'Tu rutina fue creada con éxito.');
       reset();
       router.replace(`/(main)/routines/${routineId}`);

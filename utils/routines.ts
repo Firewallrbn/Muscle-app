@@ -8,6 +8,7 @@ export interface Routine {
   profile_id: string;
   name: string;
   description?: string | null;
+  training_type?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -15,7 +16,7 @@ export interface Routine {
 export const fetchUserRoutines = async (profileId: string) => {
   const { data, error } = await supabase
     .from("routines")
-    .select("id, name, description, created_at")
+    .select("id, name, description, training_type, created_at")
     .eq("profile_id", profileId)
     .order("created_at", { ascending: false });
 
@@ -23,10 +24,10 @@ export const fetchUserRoutines = async (profileId: string) => {
   return data as Routine[];
 };
 
-export const createRoutine = async (profile_id: string, name: string, description?: string) => {
+export const createRoutine = async (profile_id: string, name: string, description?: string, training_type?: string) => {
   const { data, error } = await supabase
     .from("routines")
-    .insert({ profile_id, name, description })
+    .insert({ profile_id, name, description, training_type })
     .select("id")
     .single();
 

@@ -1,5 +1,7 @@
+import { AuthContext } from '@/Context/AuthContext';
 import { Theme, useTheme } from '@/Context/ThemeContext';
 import { useNotifications } from '@/utils/Notifications';
+import { supabase } from '@/utils/Supabase';
 import {
     TRAINING_STORAGE_KEY,
     TRAINING_TYPES,
@@ -10,8 +12,8 @@ import {
 } from '@/utils/trainingTracker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
-import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 
@@ -119,6 +121,7 @@ const buildWeeklySummary = (map: Record<string, string>) => {
 
 export default function MuscleScreen() {
   const { theme } = useTheme();
+  const { user } = useContext(AuthContext);
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [dateTypeMap, setDateTypeMap] = useState<Record<string, string>>({});
   const [selectedType, setSelectedType] = useState<string | null>('pierna');
@@ -131,10 +134,12 @@ export default function MuscleScreen() {
   const router = useRouter();
   const { scheduleDaily, cancelAll } = useNotifications();
 
-  // Cargar datos al iniciar
-  useEffect(() => {
-    loadData();
-  }, []);
+  // Recargar datos cada vez que la pantalla obtiene el foco
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [user?.id])
+  );
 
   // Guardar datos cada vez que cambian
   useEffect(() => {
@@ -145,10 +150,43 @@ export default function MuscleScreen() {
 
   const loadData = async () => {
     try {
-      const data = await loadTrainingMap();
-      setDateTypeMap(data);
+      // Cargar datos locales primero
+      const localData = await loadTrainingMap();
+      
+      // Si hay usuario, cargar datos de Supabase (workout_sessions)
+      if (user?.id) {
+        const { data: sessions, error } = await supabase
+          .from('workout_sessions')
+          .select(`
+            finished_at,
+            routine:routines(training_type)
+          `)
+          .eq('profile_id', user.id)
+          .not('finished_at', 'is', null);
+
+        if (!error && sessions) {
+          const supabaseData: Record<string, string> = {};
+          
+          sessions.forEach((session: any) => {
+            if (session.finished_at && session.routine?.training_type) {
+              // Convertir fecha a formato YYYY-MM-DD
+              const date = new Date(session.finished_at);
+              const dateStr = dateToString(date);
+              supabaseData[dateStr] = session.routine.training_type;
+            }
+          });
+          
+          // Combinar datos locales con datos de Supabase (Supabase tiene prioridad)
+          const mergedData = { ...localData, ...supabaseData };
+          setDateTypeMap(mergedData);
+        } else {
+          setDateTypeMap(localData);
+        }
+      } else {
+        setDateTypeMap(localData);
+      }
     } catch (e) {
-      console.error('Error al cargar datosss:', e);
+      console.error('Error al cargar datos:', e);
     } finally {
       setIsLoading(false);
     }

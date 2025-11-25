@@ -1,6 +1,6 @@
+import { useTheme } from "@/Context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { useTheme } from "@/Context/ThemeContext";
 
 export default function MainLayout() {
   const { theme } = useTheme();
@@ -66,6 +66,14 @@ export default function MainLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color} />
           ),
+        }}
+      />
+
+      {/* Ocultar rutas que no son tabs */}
+      <Tabs.Screen
+        name="routines"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
