@@ -1,5 +1,6 @@
 import { AuthContext } from "@/Context/AuthContext";
 import { Theme, useTheme } from "@/Context/ThemeContext";
+import TopBar from '@/components/TopBar';
 import { createClient } from '@supabase/supabase-js';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -313,9 +314,12 @@ Responde de forma profesional pero cercana.`;
 
   if (loadingProfile) {
     return (
-      <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color={theme.colors.accent} />
-        <Text style={styles.loadingText}>Cargando tu perfil...</Text>
+      <View style={styles.container}>
+        <TopBar title="M.A.X 💪" subtitle="Tu asistente de entrenamiento" />
+        <View style={[styles.centerContent, { flex: 1 }]}>
+          <ActivityIndicator size="large" color={theme.colors.accent} />
+          <Text style={styles.loadingText}>Cargando tu perfil...</Text>
+        </View>
       </View>
     );
   }
@@ -328,17 +332,14 @@ Responde de forma profesional pero cercana.`;
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>M.A.X 💪</Text>
-          <Text style={styles.subtitle}>Tu asistente de entrenamiento</Text>
-        </View>
-        <TouchableOpacity style={styles.clearBtn} onPress={clearConversation}>
-          <Text style={styles.clearBtnText}>🗑️</Text>
-        </TouchableOpacity>
-      </View>
-
+      <TopBar
+        title="M.A.X 💪"
+        subtitle="Tu asistente de entrenamiento"
+        rightAction={{
+          icon: 'trash-outline',
+          onPress: clearConversation,
+        }}
+      />
 
       <ScrollView
         style={styles.messagesContainer}
@@ -419,38 +420,6 @@ const createStyles = (theme: Theme) => {
     centerContent: {
       justifyContent: 'center',
       alignItems: 'center',
-    },
-    header: {
-      padding: 20,
-      paddingTop: 50,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      backgroundColor: colors.accent,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.12,
-      shadowRadius: 3,
-      elevation: 5,
-    },
-    title: {
-      fontSize: 28,
-      fontWeight: 'bold',
-      color: '#fff',
-    },
-    subtitle: {
-      fontSize: 14,
-      color: '#ffecec',
-      marginTop: 2,
-    },
-    clearBtn: {
-      padding: 10,
-      backgroundColor: 'rgba(255,255,255,0.12)',
-      borderRadius: 8,
-    },
-    clearBtnText: {
-      fontSize: 20,
-      color: '#fff'
     },
     limitBanner: {
       display: 'none'

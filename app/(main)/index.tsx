@@ -1,6 +1,7 @@
 import { AuthContext } from '@/Context/AuthContext';
 import { Theme, useTheme } from '@/Context/ThemeContext';
 import { fetchUserRoutines, Routine } from '@/utils/routines';
+import TopBar from '@/components/TopBar';
 import { Link, router, useFocusEffect } from 'expo-router';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -53,15 +54,15 @@ export default function RoutinesScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Tus rutinas</Text>
-          <Text style={styles.subtitle}>Organiza y guarda tus entrenamientos.</Text>
-        </View>
-        <TouchableOpacity style={styles.createButton} onPress={() => router.push('/(main)/routines/create')}>
-          <Text style={styles.createButtonText}>Crear</Text>
-        </TouchableOpacity>
-      </View>
+      <TopBar
+        title="Tus rutinas"
+        subtitle="Organiza y guarda tus entrenamientos"
+        rightAction={{
+          icon: 'add',
+          label: 'Crear',
+          onPress: () => router.push('/(main)/routines/create'),
+        }}
+      />
 
       {loading ? (
         <View style={styles.centered}>
@@ -100,33 +101,6 @@ const createStyles = (theme: Theme) =>
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
-      paddingHorizontal: 16,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingTop: 50,
-      paddingBottom: 20,
-    },
-    title: {
-      color: theme.colors.text,
-      fontSize: 24,
-      fontWeight: '700',
-    },
-    subtitle: {
-      color: theme.colors.textSecondary,
-      marginTop: 4,
-    },
-    createButton: {
-      backgroundColor: theme.colors.accent,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 12,
-    },
-    createButtonText: {
-      color: '#fff',
-      fontWeight: '600',
     },
     centered: {
       flex: 1,
@@ -182,5 +156,6 @@ const createStyles = (theme: Theme) =>
     },
     listContent: {
       paddingBottom: 32,
+      paddingHorizontal: 16,
     },
   });

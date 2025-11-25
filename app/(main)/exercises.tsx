@@ -2,6 +2,7 @@ import Camera from '@/components/Camera';
 import CategoryChip from '@/components/CategoryChip';
 import ExerciseCard from '@/components/ExerciseCard';
 import ExerciseDetailModal from '@/components/ExerciseDetailModal';
+import TopBar from '@/components/TopBar';
 import { AuthContext } from '@/Context/AuthContext';
 import { useExerciseContext } from '@/Context/ExerciseContext';
 import { useTheme } from '@/Context/ThemeContext';
@@ -11,7 +12,6 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import {
     ActivityIndicator,
     FlatList,
-    SafeAreaView,
     StyleSheet,
     Text,
     TextInput,
@@ -238,22 +238,29 @@ const handleToggleFavorite = useCallback(
 
     if (loading && exercises.length === 0) {
         return (
-            <SafeAreaView style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={colors.secondary} />
-            </SafeAreaView>
+            <View style={styles.loadingContainer}>
+                <TopBar title="Ejercicios" subtitle="Explora y descubre" />
+                <View style={styles.centered}>
+                    <ActivityIndicator size="large" color={colors.secondary} />
+                </View>
+            </View>
         );
     }
 
     if (error && exercises.length === 0) {
         return (
-            <SafeAreaView style={styles.loadingContainer}>
-                <Text style={styles.errorText}>{error}</Text>
-            </SafeAreaView>
+            <View style={styles.loadingContainer}>
+                <TopBar title="Ejercicios" subtitle="Explora y descubre" />
+                <View style={styles.centered}>
+                    <Text style={styles.errorText}>{error}</Text>
+                </View>
+            </View>
         );
     }
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <View style={styles.safeArea}>
+            <TopBar title="Ejercicios" subtitle="Explora y descubre" />
             <Camera></Camera>
             <FlatList
                 data={displayedExercises}
@@ -282,7 +289,7 @@ const handleToggleFavorite = useCallback(
                 loading={loadingDetails}
                 onClose={handleCloseModal}
             />
-        </SafeAreaView>
+        </View>
     );
 };
 
@@ -295,6 +302,10 @@ const createStyles = (theme: ReturnType<typeof useTheme>['theme']) => {
             backgroundColor: colors.background,
         },
         loadingContainer: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        centered: {
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',

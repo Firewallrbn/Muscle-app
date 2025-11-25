@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
 import { useRoutineBuilder } from '@/Context/RoutineBuilderContext';
 import { AuthContext } from '@/Context/AuthContext';
@@ -7,6 +7,7 @@ import { Exercise } from '@/types';
 import { useExerciseContext } from '@/Context/ExerciseContext';
 import { fetchLikedExercises } from '@/utils/exerciseApi';
 import ExerciseCard from '@/components/ExerciseCard';
+import TopBar from '@/components/TopBar';
 import { Theme, useTheme } from '@/Context/ThemeContext';
 
 export default function AddExercisesScreen() {
@@ -54,13 +55,20 @@ export default function AddExercisesScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Añadir ejercicios</Text>
-        <TouchableOpacity onPress={() => setOnlyFavorites((prev) => !prev)} style={styles.filterButton}>
-          <Text style={styles.filterText}>{onlyFavorites ? 'Ver todos' : 'Solo favoritos'}</Text>
-        </TouchableOpacity>
-      </View>
+    <View style={styles.container}>
+      <TopBar
+        title="Añadir ejercicios"
+        subtitle={`${exercises.length} seleccionados`}
+        showBack
+        rightComponent={
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={() => setOnlyFavorites((prev) => !prev)}
+          >
+            <Text style={styles.filterText}>{onlyFavorites ? 'Ver todos' : 'Favoritos'}</Text>
+          </TouchableOpacity>
+        }
+      />
 
       {loading ? (
         <View style={styles.centered}>
@@ -75,6 +83,7 @@ export default function AddExercisesScreen() {
           data={visibleExercises}
           keyExtractor={(item) => item.id}
           renderItem={renderExercise}
+          contentContainerStyle={styles.listContent}
           ListEmptyComponent={() => (
             <View style={styles.centered}>
               <Text style={styles.errorText}>No se encontraron ejercicios.</Text>
@@ -91,7 +100,7 @@ export default function AddExercisesScreen() {
           <Text style={styles.primaryText}>Continuar</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -100,19 +109,6 @@ const createStyles = (theme: Theme) =>
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
-      paddingHorizontal: 16,
-      paddingTop: 50,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    title: {
-      color: theme.colors.text,
-      fontSize: 22,
-      fontWeight: '700',
     },
     filterButton: {
       backgroundColor: theme.colors.card,
@@ -130,11 +126,16 @@ const createStyles = (theme: Theme) =>
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
+      paddingHorizontal: 16,
     },
     errorText: {
       color: theme.colors.accent,
       textAlign: 'center',
       marginBottom: 8,
+    },
+    listContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 16,
     },
     card: {
       marginBottom: 10,
@@ -143,6 +144,7 @@ const createStyles = (theme: Theme) =>
       flexDirection: 'row',
       gap: 12,
       paddingVertical: 16,
+      paddingHorizontal: 16,
     },
     outlineButton: {
       flex: 1,

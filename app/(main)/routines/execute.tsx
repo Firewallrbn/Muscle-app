@@ -1,5 +1,6 @@
 import { AuthContext } from '@/Context/AuthContext';
 import { useTheme } from '@/Context/ThemeContext';
+import TopBar from '@/components/TopBar';
 import { supabase } from '@/utils/Supabase';
 import { denormalizeExerciseId, fetchExerciseById } from '@/utils/exerciseApi';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -7,7 +8,6 @@ import { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -217,17 +217,23 @@ export default function ExecuteRoutineScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color={theme.colors.accent} />
-      </SafeAreaView>
+      <View style={styles.container}>
+        <TopBar title="Ejecutando..." showBack />
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={theme.colors.accent} />
+        </View>
+      </View>
     );
   }
 
   if (exercises.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.emptyText}>No hay ejercicios en esta rutina.</Text>
-      </SafeAreaView>
+      <View style={styles.container}>
+        <TopBar title="Sin ejercicios" showBack />
+        <View style={styles.centered}>
+          <Text style={styles.emptyText}>No hay ejercicios en esta rutina.</Text>
+        </View>
+      </View>
     );
   }
 
@@ -239,16 +245,18 @@ export default function ExecuteRoutineScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header con progreso */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backButton}>← Atrás</Text>
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <TopBar
+        title={currentExercise.exercise_name}
+        subtitle={`Progreso: ${progress}%`}
+        showBack
+      />
+
+      {/* Barra de progreso */}
+      <View style={styles.progressWrapper}>
         <View style={styles.progressContainer}>
           <View style={[styles.progressBar, { width: `${progress}%` }]} />
         </View>
-        <Text style={styles.progressText}>{progress}%</Text>
       </View>
 
       {execution.isResting ? (
@@ -331,7 +339,7 @@ export default function ExecuteRoutineScreen() {
           </View>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -340,21 +348,17 @@ const createStyles = (theme: any) =>
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
-      paddingHorizontal: 16,
     },
-    header: {
-      flexDirection: 'row',
+    centered: {
+      flex: 1,
+      justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 24,
-      gap: 12,
     },
-    backButton: {
-      color: theme.colors.accent,
-      fontSize: 16,
-      fontWeight: '600',
+    progressWrapper: {
+      paddingHorizontal: 16,
+      paddingBottom: 16,
     },
     progressContainer: {
-      flex: 1,
       height: 8,
       backgroundColor: theme.colors.input,
       borderRadius: 4,
@@ -364,18 +368,12 @@ const createStyles = (theme: any) =>
       height: '100%',
       backgroundColor: theme.colors.accent,
     },
-    progressText: {
-      color: theme.colors.text,
-      fontSize: 14,
-      fontWeight: '700',
-      minWidth: 40,
-      textAlign: 'right',
-    },
 
     /* Pantalla de ejercicio */
     exerciseContainer: {
       flex: 1,
       justifyContent: 'space-between',
+      paddingHorizontal: 16,
     },
     exerciseCard: {
       backgroundColor: theme.colors.card,

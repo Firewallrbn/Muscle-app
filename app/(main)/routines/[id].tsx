@@ -1,10 +1,11 @@
 import { Theme, useTheme } from '@/Context/ThemeContext';
+import TopBar from '@/components/TopBar';
 import { RoutineExerciseDisplay } from '@/types';
 import { supabase } from '@/utils/Supabase';
 import { fetchRoutineDetails } from '@/utils/routines';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface RoutineDetail {
   id: string;
@@ -72,36 +73,52 @@ export default function RoutineDetailScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
+        <TopBar title="Cargando..." showBack />
         <View style={styles.centered}>
           <ActivityIndicator color={theme.colors.accent} />
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
+        <TopBar title="Error" showBack />
         <View style={styles.centered}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{routine?.name}</Text>
-        {routine?.description ? <Text style={styles.subtitle}>{routine.description}</Text> : null}
-        <Text style={styles.dateText}>{routine?.created_at ? new Date(routine.created_at).toLocaleString() : ''}</Text>
-      </View>
+    <View style={styles.container}>
+      <TopBar
+        title={routine?.name ?? 'Rutina'}
+        subtitle={routine?.description ?? undefined}
+        showBack
+        rightAction={
+          routine
+            ? {
+                icon: 'play',
+                label: 'Iniciar',
+                onPress: () =>
+                  router.push({
+                    pathname: '/(main)/routines/execute',
+                    params: { id: routine.id },
+                  }),
+              }
+            : undefined
+        }
+      />
 
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
+        contentContainerStyle={styles.listContent}
         ListEmptyComponent={() => (
           <View style={styles.centered}>
             <Text style={styles.errorText}>No hay ejercicios en esta rutina.</Text>
@@ -110,25 +127,24 @@ export default function RoutineDetailScreen() {
       />
 
       <View style={styles.footer}>
-        <TouchableOpacity
-          style={styles.outlineButton}
-          onPress={handleBack}
-        >
+        <TouchableOpacity style={styles.outlineButton} onPress={handleBack}>
           <Text style={styles.outlineText}>Atrás</Text>
         </TouchableOpacity>
         {routine && (
           <TouchableOpacity
             style={styles.primaryButton}
-            onPress={() => router.push({
-              pathname: '/(main)/routines/execute',
-              params: { id: routine.id }
-            })}
+            onPress={() =>
+              router.push({
+                pathname: '/(main)/routines/execute',
+                params: { id: routine.id },
+              })
+            }
           >
             <Text style={styles.primaryText}>Ejecutar rutina</Text>
           </TouchableOpacity>
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -137,24 +153,10 @@ const createStyles = (theme: Theme) =>
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
+    },
+    listContent: {
       paddingHorizontal: 16,
-      paddingTop: 50,
-    },
-    header: {
-      marginBottom: 16,
-    },
-    title: {
-      color: theme.colors.text,
-      fontSize: 24,
-      fontWeight: '700',
-    },
-    subtitle: {
-      color: theme.colors.textSecondary,
-      marginTop: 6,
-    },
-    dateText: {
-      color: theme.colors.textSecondary,
-      marginTop: 6,
+      paddingBottom: 16,
     },
     centered: {
       flex: 1,
@@ -202,6 +204,7 @@ const createStyles = (theme: Theme) =>
       flexDirection: 'row',
       gap: 12,
       paddingVertical: 16,
+      paddingHorizontal: 16,
       borderTopWidth: 1,
       borderTopColor: theme.colors.border,
     },

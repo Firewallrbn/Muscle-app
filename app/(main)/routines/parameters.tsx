@@ -1,10 +1,11 @@
 import { AuthContext } from '@/Context/AuthContext';
 import { useRoutineBuilder } from '@/Context/RoutineBuilderContext';
 import { Theme, useTheme } from '@/Context/ThemeContext';
+import TopBar from '@/components/TopBar';
 import { addExerciseToRoutine, createRoutine } from '@/utils/routines';
 import { router } from 'expo-router';
 import { useContext, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function RoutineParametersScreen() {
   const { user } = useContext(AuthContext);
@@ -129,11 +130,12 @@ export default function RoutineParametersScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Parámetros</Text>
-        <Text style={styles.subtitle}>Define sets, repeticiones y descansos.</Text>
-      </View>
+    <View style={styles.container}>
+      <TopBar
+        title="Parámetros"
+        subtitle="Define sets, reps y descansos"
+        showBack
+      />
 
       <FlatList
         data={exercises}
@@ -144,7 +146,7 @@ export default function RoutineParametersScreen() {
             <Text style={styles.emptyText}>No has agregado ejercicios.</Text>
           </View>
         )}
-        contentContainerStyle={{ paddingBottom: 140 }}
+        contentContainerStyle={styles.listContent}
       />
 
       <View style={styles.footer}>
@@ -155,7 +157,7 @@ export default function RoutineParametersScreen() {
           {saving ? <ActivityIndicator color={theme.colors.text} /> : <Text style={styles.primaryText}>Finalizar rutina</Text>}
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -164,20 +166,10 @@ const createStyles = (theme: Theme) =>
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
+    },
+    listContent: {
       paddingHorizontal: 16,
-      paddingTop: 50,
-    },
-    header: {
-      marginBottom: 16,
-    },
-    title: {
-      color: theme.colors.text,
-      fontSize: 22,
-      fontWeight: '700',
-    },
-    subtitle: {
-      color: theme.colors.textSecondary,
-      marginTop: 4,
+      paddingBottom: 100,
     },
     card: {
       backgroundColor: theme.colors.card,

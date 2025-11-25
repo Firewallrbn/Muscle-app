@@ -10,6 +10,7 @@ import {
   loadTrainingMap,
   saveTrainingMap,
 } from '@/utils/trainingTracker';
+import TopBar from '@/components/TopBar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -427,13 +428,17 @@ export default function MuscleScreen() {
   const weeklySummary = buildWeeklySummary(dateTypeMap);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <Text style={styles.title}>Muscle</Text>
-      <Text style={styles.subtitle}>
-        Selecciona un tipo y toca un día para anotarlo. Toca otra vez para borrar.
-      </Text>
-
-      <View style={styles.statsRow}>
+    <View style={styles.wrapper}>
+      <TopBar
+        title="Muscle"
+        subtitle="Registra tus entrenamientos"
+        rightAction={{
+          icon: 'notifications-outline',
+          onPress: openReminderModal,
+        }}
+      />
+      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.statsRow}>
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Racha actual</Text>
           <Text style={styles.statValue}>{currentStreak} días</Text>
@@ -658,32 +663,25 @@ export default function MuscleScreen() {
         </View>
       </Modal>
     </ScrollView>
+    </View>
   );
 }
 
 const createStyles = (theme: Theme) => {
   const { colors } = theme;
   return StyleSheet.create({
+    wrapper: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
     container: {
       flex: 1,
       paddingHorizontal: 16,
       backgroundColor: colors.background,
     },
     scrollContent: {
-      paddingTop: 50,
+      paddingTop: 16,
       paddingBottom: 32,
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: '700',
-      marginBottom: 8,
-      color: colors.text,
-    },
-    subtitle: {
-      fontSize: 14,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      marginBottom: 12,
     },
     legendContainer: {
       width: '100%',

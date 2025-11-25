@@ -1,5 +1,6 @@
 import { AuthContext } from '@/Context/AuthContext';
 import { Theme, ThemeMode, useTheme } from '@/Context/ThemeContext';
+import TopBar from '@/components/TopBar';
 import { supabase } from '@/utils/Supabase';
 import { fetchWorkoutStats, WorkoutStats } from '@/utils/workouts';
 import { useFocusEffect } from 'expo-router';
@@ -429,17 +430,15 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
+      <TopBar
+        title="Tu perfil"
+        subtitle="Resumen de progreso y datos"
+        rightAction={{
+          icon: 'settings-outline',
+          onPress: () => setSettingsVisible(true),
+        }}
+      />
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.title}>Tu perfil</Text>
-            <Text style={styles.subtitle}>Resumen de progreso y datos personales.</Text>
-          </View>
-          <TouchableOpacity style={styles.menuButton} onPress={() => setSettingsVisible(true)}>
-            <Text style={styles.menuDots}>⋯</Text>
-          </TouchableOpacity>
-        </View>
-
         <View style={styles.profileCard}>
           {loadingProfile ? (
             <ActivityIndicator color={theme.colors.accent} />
@@ -611,38 +610,8 @@ const createStyles = (theme: Theme) => {
     },
     content: {
       paddingHorizontal: 16,
-      paddingTop: 50,
+      paddingTop: 16,
       paddingBottom: 40,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    title: {
-      color: colors.text,
-      fontSize: 24,
-      fontWeight: '700',
-    },
-    subtitle: {
-      color: colors.textSecondary,
-      marginTop: 4,
-    },
-    menuButton: {
-      width: 40,
-      height: 40,
-      borderRadius: 12,
-      backgroundColor: colors.card,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    menuDots: {
-      color: colors.text,
-      fontSize: 22,
-      marginTop: -4,
     },
     profileCard: {
       backgroundColor: colors.card,

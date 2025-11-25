@@ -1,6 +1,7 @@
 import { AuthContext } from '@/Context/AuthContext';
 import { useRoutineBuilder } from '@/Context/RoutineBuilderContext';
 import { Theme, useTheme } from '@/Context/ThemeContext';
+import TopBar from '@/components/TopBar';
 import { TRAINING_TYPES } from '@/utils/trainingTracker';
 import { router } from 'expo-router';
 import { useContext, useEffect, useMemo } from 'react';
@@ -31,12 +32,12 @@ export default function CreateRoutineScreen() {
 
   return (
     <View style={styles.container}>
+      <TopBar
+        title="Nueva rutina"
+        subtitle="Asigna un nombre y descripción"
+        showBack
+      />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Nueva rutina</Text>
-          <Text style={styles.subtitle}>Asigna un nombre y una descripción breve.</Text>
-        </View>
-
         <View style={styles.card}>
           <Text style={styles.label}>Nombre</Text>
           <TextInput
@@ -112,20 +113,8 @@ const createStyles = (theme: Theme) =>
     },
     scrollContent: {
       paddingHorizontal: 16,
-      paddingTop: 50,
+      paddingTop: 16,
       paddingBottom: 40,
-    },
-    header: {
-      marginBottom: 20,
-    },
-    title: {
-      color: theme.colors.text,
-      fontSize: 24,
-      fontWeight: '700',
-    },
-    subtitle: {
-      color: theme.colors.textSecondary,
-      marginTop: 4,
     },
     card: {
       backgroundColor: theme.colors.card,
