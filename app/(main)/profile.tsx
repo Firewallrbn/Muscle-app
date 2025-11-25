@@ -39,6 +39,7 @@ export default function ProfileScreen() {
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [loadingStats, setLoadingStats] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [measurementsExpanded, setMeasurementsExpanded] = useState(true);
   const [formValues, setFormValues] = useState({
     weight: '',
     height: '',
@@ -169,12 +170,12 @@ export default function ProfileScreen() {
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Macros diarios</Text>
       <View style={styles.placeholderCard}>
-        <Text style={styles.placeholderTitle}>Próximamente</Text>
+        <Text style={styles.placeholderTitle}>Disponible con Muscle+</Text>
         <Text style={styles.placeholderText}>
-          Aquí verás tu ingesta de proteínas, carbohidratos y grasas. Registra tus comidas para comenzar a seguirlas.
+          Desbloquea el seguimiento de proteínas, carbohidratos y grasas registrando tus comidas con Muscle+.
         </Text>
         <TouchableOpacity style={styles.placeholderButton}>
-          <Text style={styles.placeholderButtonText}>Agregar registro</Text>
+          <Text style={styles.placeholderButtonText}>Conocer Muscle+</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -249,49 +250,61 @@ export default function ProfileScreen() {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Ajustes y datos</Text>
 
-            <Text style={styles.modalLabel}>Peso (kg)</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder="Ej. 72"
-              placeholderTextColor="#8C8B91"
-              value={formValues.weight}
-              onChangeText={(text) => setFormValues((prev) => ({ ...prev, weight: text }))}
-            />
-
-            <Text style={styles.modalLabel}>Altura (cm)</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder="Ej. 175"
-              placeholderTextColor="#8C8B91"
-              value={formValues.height}
-              onChangeText={(text) => setFormValues((prev) => ({ ...prev, height: text }))}
-            />
-
-            <Text style={styles.modalLabel}>Edad</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder="Ej. 28"
-              placeholderTextColor="#8C8B91"
-              value={formValues.age}
-              onChangeText={(text) => setFormValues((prev) => ({ ...prev, age: text }))}
-            />
-
-            <Text style={styles.modalLabel}>Objetivo de peso (kg)</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder="Ej. 80"
-              placeholderTextColor="#8C8B91"
-              value={formValues.weight_goal}
-              onChangeText={(text) => setFormValues((prev) => ({ ...prev, weight_goal: text }))}
-            />
-
-            <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
-              <Text style={styles.saveButtonText}>Guardar cambios</Text>
+            <TouchableOpacity
+              style={styles.placeholderRow}
+              onPress={() => setMeasurementsExpanded((prev) => !prev)}
+            >
+              <Text style={styles.placeholderRowText}>Medidas</Text>
+              <Text style={styles.placeholderTag}>{measurementsExpanded ? 'Ocultar' : 'Editar'}</Text>
             </TouchableOpacity>
+
+            {measurementsExpanded ? (
+              <View style={styles.measurementsCard}>
+                <Text style={styles.modalLabel}>Peso (kg)</Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  placeholder="Ej. 72"
+                  placeholderTextColor="#8C8B91"
+                  value={formValues.weight}
+                  onChangeText={(text) => setFormValues((prev) => ({ ...prev, weight: text }))}
+                />
+
+                <Text style={styles.modalLabel}>Altura (cm)</Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  placeholder="Ej. 175"
+                  placeholderTextColor="#8C8B91"
+                  value={formValues.height}
+                  onChangeText={(text) => setFormValues((prev) => ({ ...prev, height: text }))}
+                />
+
+                <Text style={styles.modalLabel}>Edad</Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  placeholder="Ej. 28"
+                  placeholderTextColor="#8C8B91"
+                  value={formValues.age}
+                  onChangeText={(text) => setFormValues((prev) => ({ ...prev, age: text }))}
+                />
+
+                <Text style={styles.modalLabel}>Objetivo de peso (kg)</Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  placeholder="Ej. 80"
+                  placeholderTextColor="#8C8B91"
+                  value={formValues.weight_goal}
+                  onChangeText={(text) => setFormValues((prev) => ({ ...prev, weight_goal: text }))}
+                />
+
+                <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
+                  <Text style={styles.saveButtonText}>Guardar cambios</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null}
 
             <View style={styles.modalDivider} />
             <Text style={styles.modalSubtitle}>Preferencias</Text>
@@ -299,7 +312,6 @@ export default function ProfileScreen() {
             {["Tema", "Idioma", "Sincronización", "Ayuda", "Privacidad"].map((item) => (
               <TouchableOpacity key={item} style={styles.placeholderRow}>
                 <Text style={styles.placeholderRowText}>{item}</Text>
-                <Text style={styles.placeholderTag}>Próximamente</Text>
               </TouchableOpacity>
             ))}
 
@@ -525,6 +537,11 @@ const styles = StyleSheet.create({
     color: '#8C8B91',
     marginTop: 10,
     marginBottom: 4,
+  },
+  measurementsCard: {
+    backgroundColor: '#1C1C1E',
+    padding: 12,
+    borderRadius: 12,
   },
   input: {
     backgroundColor: '#1C1C1E',
