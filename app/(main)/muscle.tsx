@@ -145,7 +145,7 @@ export default function MuscleScreen() {
       const data = await loadTrainingMap();
       setDateTypeMap(data);
     } catch (e) {
-      console.error('Error al cargar datos:', e);
+      console.error('Error al cargar datosss:', e);
     } finally {
       setIsLoading(false);
     }

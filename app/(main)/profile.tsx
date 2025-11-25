@@ -1,4 +1,8 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { AuthContext } from '@/Context/AuthContext';
+import { supabase } from '@/utils/Supabase';
+import { fetchWorkoutStats, WorkoutStats } from '@/utils/workouts';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -11,11 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useFocusEffect } from 'expo-router';
-import { LineChart } from 'expo-charts';
-import { AuthContext } from '@/Context/AuthContext';
-import { supabase } from '@/utils/Supabase';
-import { fetchWorkoutStats, WorkoutStats } from '@/utils/workouts';
+import { LineChart } from 'react-native-chart-kit';
 
 type ProfileData = {
   id: string;
