@@ -3,12 +3,12 @@ import { Theme, useTheme } from '@/Context/ThemeContext';
 import { useNotifications } from '@/utils/Notifications';
 import { supabase } from '@/utils/Supabase';
 import {
-    TRAINING_STORAGE_KEY,
-    TRAINING_TYPES,
-    dateToString,
-    getTodayDateString,
-    loadTrainingMap,
-    saveTrainingMap,
+  TRAINING_STORAGE_KEY,
+  TRAINING_TYPES,
+  dateToString,
+  getTodayDateString,
+  loadTrainingMap,
+  saveTrainingMap,
 } from '@/utils/trainingTracker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
