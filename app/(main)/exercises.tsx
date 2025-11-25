@@ -1,10 +1,11 @@
 import Camera from '@/components/Camera';
 import CategoryChip from '@/components/CategoryChip';
 import ExerciseCard from '@/components/ExerciseCard';
-import { useExerciseContext } from '@/Context/ExerciseContext';
 import { AuthContext } from '@/Context/AuthContext';
+import { useExerciseContext } from '@/Context/ExerciseContext';
 import { Exercise } from '@/types';
-import React, { useCallback, useMemo, useState, useContext, useEffect } from 'react';
+import { fetchLikedExercises, normalizeExerciseId, toggleLike } from '@/utils/exerciseApi';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
@@ -15,7 +16,6 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { fetchLikedExercises, normalizeExerciseId, toggleLike } from '@/utils/exerciseApi';
 
 const ITEMS_PER_BATCH = 20;
 
@@ -96,26 +96,30 @@ const ExercisesScreen: React.FC = () => {
         setVisibleCount((prev) => Math.min(prev + ITEMS_PER_BATCH, filteredExercises.length));
     }, [filteredExercises.length, loading, visibleCount]);
 
-    const handleToggleFavorite = useCallback(
-        async (exerciseId: string) => {
-            if (!user?.id || processingLike) return;
-            setProcessingLike(true);
-            try {
-                const normalizedId = normalizeExerciseId(exerciseId);
-                const status = await toggleLike(user.id, exerciseId);
-                setLikedIds((prev) =>
-                    status === 'liked'
-                        ? [...prev, normalizedId]
-                        : prev.filter((id) => id !== normalizedId)
-                );
-            } catch (err) {
-                console.error('Toggle like error', err);
-            } finally {
-                setProcessingLike(false);
-            }
-        },
-        [user?.id, processingLike],
-    );
+const handleToggleFavorite = useCallback(
+  async (exerciseId: string) => {
+      if (!user?.id || processingLike) return;
+      setProcessingLike(true);
+      try {
+          const normalizedId = normalizeExerciseId(exerciseId);
+
+          // Usa el mismo id que vas a guardar en likedIds
+          const status = await toggleLike(user.id, normalizedId);
+
+          setLikedIds((prev) =>
+              status === 'liked'
+                  ? [...prev, normalizedId]
+                  : prev.filter((id) => id !== normalizedId)
+          );
+      } catch (err) {
+          console.error('Toggle like error', err);
+      } finally {
+          setProcessingLike(false);
+      }
+  },
+  [user?.id, processingLike],
+);
+
 
     const renderExercise = useCallback(
         ({ item }: { item: Exercise }) => {
