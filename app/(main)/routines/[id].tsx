@@ -2,9 +2,9 @@ import { Theme, useTheme } from '@/Context/ThemeContext';
 import { RoutineExerciseDisplay } from '@/types';
 import { supabase } from '@/utils/Supabase';
 import { fetchRoutineDetails } from '@/utils/routines';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface RoutineDetail {
   id: string;
@@ -197,5 +197,38 @@ const createStyles = (theme: Theme) =>
     exerciseNotes: {
       color: theme.colors.textSecondary,
       marginTop: 6,
+    },
+    footer: {
+      flexDirection: 'row',
+      gap: 12,
+      paddingVertical: 16,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+    },
+    outlineButton: {
+      flex: 1,
+      paddingVertical: 14,
+      borderRadius: 14,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      backgroundColor: theme.colors.card,
+    },
+    outlineText: {
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    primaryButton: {
+      flex: 1,
+      backgroundColor: theme.colors.accent,
+      paddingVertical: 14,
+      borderRadius: 14,
+      alignItems: 'center',
+    },
+    primaryText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: '700',
     },
   });
