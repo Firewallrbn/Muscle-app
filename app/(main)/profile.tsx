@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Dimensions,
   Modal,
   ScrollView,
   StyleSheet,
@@ -11,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
+import { LineChart } from 'expo-charts';
 import { AuthContext } from '@/Context/AuthContext';
 import { supabase } from '@/utils/Supabase';
 import { fetchWorkoutStats, WorkoutStats } from '@/utils/workouts';
@@ -26,6 +28,22 @@ type ProfileData = {
 };
 
 const ACCENT = '#FC3058';
+const chartConfig = {
+  backgroundGradientFrom: '#1C1C1E',
+  backgroundGradientTo: '#1C1C1E',
+  color: (opacity = 1) => `rgba(252, 48, 88, ${opacity})`,
+  labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+  decimalPlaces: 0,
+  propsForDots: {
+    r: '5',
+    strokeWidth: '2',
+    stroke: '#fff',
+  },
+  propsForBackgroundLines: {
+    stroke: '#2A2A2E',
+  },
+};
+const chartWidth = Dimensions.get('window').width - 32;
 
 const formatDate = (value: string) => {
   const date = new Date(value);
@@ -126,20 +144,68 @@ export default function ProfileScreen() {
   );
 
   const renderWeeklyActivity = () => {
-    if (!stats?.weeklyActivity?.length) return null;
+    if (!stats?.weeklyActivity?.length) {
+      return (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Actividad semanal</Text>
+          <View style={[styles.placeholderCard, styles.chartPlaceholder]}>
+            <Text style={styles.placeholderEmoji}>📊</Text>
+            <Text style={styles.placeholderTitle}>Aún no hay entrenos</Text>
+            <Text style={styles.placeholderText}>
+              Registra tus primeras sesiones para ver un gráfico con la actividad de los últimos 7 días.
+            </Text>
+          </View>
+        </View>
+      );
+    }
+
+    const weeklyValues = stats.weeklyActivity.map((day) => day.count);
+    const hasData = weeklyValues.some((value) => value > 0);
+
+    if (!hasData) {
+      return (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Actividad semanal</Text>
+          <View style={[styles.placeholderCard, styles.chartPlaceholder]}>
+            <Text style={styles.placeholderEmoji}>🧘‍♂️</Text>
+            <Text style={styles.placeholderTitle}>Todo listo para empezar</Text>
+            <Text style={styles.placeholderText}>
+              En cuanto completes tu primer entrenamiento llenaremos este espacio con tu actividad semanal.
+            </Text>
+          </View>
+        </View>
+      );
+    }
+
+    const chartData = {
+      labels: stats.weeklyActivity.map((day) => day.label),
+      datasets: [
+        {
+          data: weeklyValues,
+          color: (opacity = 1) => `rgba(252, 48, 88, ${opacity})`,
+        },
+      ],
+    };
 
     return (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Actividad semanal</Text>
-        {stats.weeklyActivity.map((day, index) => (
-          <View key={`${day.label}-${index}`} style={styles.weekRow}>
-            <Text style={styles.weekLabel}>{day.label}</Text>
-            <View style={styles.weekBarContainer}>
-              <View style={[styles.weekBar, { width: `${Math.min(day.count * 20, 100)}%` }]} />
-            </View>
-            <Text style={styles.weekCount}>{day.count}</Text>
+        <View style={styles.chartCard}>
+          <LineChart
+            data={chartData}
+            width={chartWidth}
+            height={220}
+            chartConfig={chartConfig}
+            fromZero
+            bezier
+            style={styles.chart}
+            segments={4}
+          />
+          <View style={styles.chartFooter}>
+            <Text style={styles.chartFooterText}>Últimos 7 días</Text>
+            <Text style={styles.chartHint}>Cuenta las sesiones registradas por día.</Text>
           </View>
-        ))}
+        </View>
       </View>
     );
   };
@@ -436,31 +502,26 @@ const styles = StyleSheet.create({
     color: '#8C8B91',
     marginTop: 6,
   },
-  weekRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
+  chartCard: {
+    backgroundColor: '#1C1C1E',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
   },
-  weekLabel: {
-    color: '#8C8B91',
-    width: 40,
+  chart: {
+    borderRadius: 12,
   },
-  weekBarContainer: {
-    flex: 1,
-    height: 8,
-    backgroundColor: '#2A2A2E',
-    borderRadius: 8,
-    overflow: 'hidden',
+  chartFooter: {
+    paddingHorizontal: 12,
+    paddingBottom: 10,
   },
-  weekBar: {
-    height: '100%',
-    backgroundColor: ACCENT,
-    borderRadius: 8,
-  },
-  weekCount: {
+  chartFooterText: {
     color: '#fff',
-    width: 30,
-    textAlign: 'right',
+    fontWeight: '700',
+  },
+  chartHint: {
+    color: '#8C8B91',
+    marginTop: 4,
   },
   sessionCard: {
     backgroundColor: '#1C1C1E',
@@ -494,6 +555,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#1C1C1E',
     padding: 16,
     borderRadius: 14,
+  },
+  chartPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    rowGap: 8,
+  },
+  placeholderEmoji: {
+    fontSize: 28,
   },
   placeholderTitle: {
     color: '#fff',
