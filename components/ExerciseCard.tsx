@@ -1,7 +1,8 @@
+import { Theme, useTheme } from '@/Context/ThemeContext';
 import { Exercise } from '@/types';
-import React, { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React, { useMemo, useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 const placeholderImage = require('../assets/images/icon.png');
 
@@ -12,7 +13,10 @@ interface ExerciseCardProps {
 }
 
 const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, liked = false, onToggleLike }) => {
+    const { theme } = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const [usePlaceholder, setUsePlaceholder] = useState(!exercise.imageUrl && !exercise.gifUrl);
+    
     return (
         <View style={styles.card}>
             <Image
@@ -35,7 +39,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, liked = false, on
                             <Ionicons
                                 name={liked ? 'heart' : 'heart-outline'}
                                 size={22}
-                                color={liked ? '#FC3058' : '#8C8B91'}
+                                color={liked ? '#FC3058' : theme.colors.textSecondary}
                             />
                         </Pressable>
                     ) : null}
@@ -50,58 +54,63 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, liked = false, on
     );
 };
 
-const styles = StyleSheet.create({
-    card: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 24,
-        marginBottom: 16,
-        overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 12 },
-        shadowOpacity: 0.08,
-        shadowRadius: 16,
-        elevation: 3,
-    },
-    thumbnail: {
-        width: '100%',
-        height: 180,
-    },
-    content: {
-        paddingHorizontal: 18,
-        paddingVertical: 16,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#1C1C1E',
-        textTransform: 'capitalize',
-        marginBottom: 8,
-        flex: 1,
-        marginRight: 12,
-    },
-    metaRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    metaText: {
-        fontSize: 14,
-        color: '#6B7280',
-        textTransform: 'capitalize',
-        marginRight: 6,
-    },
-    metaTextLast: {
-        marginRight: 0,
-    },
-    dot: {
-        fontSize: 14,
-        color: '#D1D5DB',
-        marginRight: 6,
-    },
-});
+const createStyles = (theme: Theme) => {
+    const { colors } = theme;
+    return StyleSheet.create({
+        card: {
+            backgroundColor: colors.card,
+            borderRadius: 24,
+            marginBottom: 16,
+            overflow: 'hidden',
+            borderWidth: 1,
+            borderColor: colors.border,
+            shadowColor: theme.mode === 'light' ? '#000' : 'transparent',
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: theme.mode === 'light' ? 0.06 : 0,
+            shadowRadius: 12,
+            elevation: theme.mode === 'light' ? 3 : 0,
+        },
+        thumbnail: {
+            width: '100%',
+            height: 180,
+        },
+        content: {
+            paddingHorizontal: 18,
+            paddingVertical: 16,
+        },
+        headerRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        title: {
+            fontSize: 18,
+            fontWeight: '600',
+            color: colors.text,
+            textTransform: 'capitalize',
+            marginBottom: 8,
+            flex: 1,
+            marginRight: 12,
+        },
+        metaRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        metaText: {
+            fontSize: 14,
+            color: colors.textSecondary,
+            textTransform: 'capitalize',
+            marginRight: 6,
+        },
+        metaTextLast: {
+            marginRight: 0,
+        },
+        dot: {
+            fontSize: 14,
+            color: colors.border,
+            marginRight: 6,
+        },
+    });
+};
 
 export default ExerciseCard;

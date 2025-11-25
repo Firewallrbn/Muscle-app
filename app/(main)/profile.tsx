@@ -1,4 +1,5 @@
 import { AuthContext } from '@/Context/AuthContext';
+import { Theme, ThemeMode, useTheme } from '@/Context/ThemeContext';
 import { supabase } from '@/utils/Supabase';
 import { fetchWorkoutStats, WorkoutStats } from '@/utils/workouts';
 import { useFocusEffect } from 'expo-router';
@@ -16,7 +17,6 @@ import {
   View,
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
-import { Theme, useTheme } from '@/Context/ThemeContext';
 
 type ProfileData = {
   id: string;
@@ -49,7 +49,8 @@ export default function ProfileScreen() {
     age: '',
     weight_goal: '',
   });
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
+  const [selectedTheme, setSelectedTheme] = useState<ThemeMode>(theme.mode);
   const styles = useMemo(() => createStyles(theme), [theme]);
   const chartConfig = useMemo(
     () => ({
@@ -267,7 +268,7 @@ export default function ProfileScreen() {
 
         <View style={styles.profileCard}>
           {loadingProfile ? (
-            <ActivityIndicator color={ACCENT} />
+            <ActivityIndicator color={theme.colors.accent} />
           ) : (
             <>
               <Text style={styles.profileName}>{profile?.username ?? 'Sin nombre'}</Text>
@@ -297,7 +298,7 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Tu progreso</Text>
           {loadingStats ? (
-            <ActivityIndicator color={ACCENT} />
+            <ActivityIndicator color={theme.colors.accent} />
           ) : (
             <View style={styles.statsRow}>
               {renderStatCard('Workouts esta semana', `${stats?.sessionsThisWeek ?? 0}`, 'Últimos 7 días')}
@@ -380,7 +381,35 @@ export default function ProfileScreen() {
             <View style={styles.modalDivider} />
             <Text style={styles.modalSubtitle}>Preferencias</Text>
 
-            {["Tema", "Idioma", "Sincronización", "Ayuda", "Privacidad"].map((item) => (
+            <TouchableOpacity style={styles.placeholderRow}>
+              <Text style={styles.placeholderRowText}>Tema</Text>
+              <View style={styles.themeSelector}>
+                <TouchableOpacity
+                  style={[styles.themeButton, selectedTheme === 'light' && styles.themeButtonActive]}
+                  onPress={() => {
+                    setSelectedTheme('light');
+                    toggleTheme('light');
+                  }}
+                >
+                  <Text style={[styles.themeButtonText, selectedTheme === 'light' && styles.themeButtonTextActive]}>
+                    ☀️ Claro
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.themeButton, selectedTheme === 'dark' && styles.themeButtonActive]}
+                  onPress={() => {
+                    setSelectedTheme('dark');
+                    toggleTheme('dark');
+                  }}
+                >
+                  <Text style={[styles.themeButtonText, selectedTheme === 'dark' && styles.themeButtonTextActive]}>
+                    🌙 Oscuro
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+
+            {["Idioma", "Sincronización", "Ayuda", "Privacidad"].map((item) => (
               <TouchableOpacity key={item} style={styles.placeholderRow}>
                 <Text style={styles.placeholderRowText}>{item}</Text>
               </TouchableOpacity>
@@ -694,6 +723,32 @@ const createStyles = (theme: Theme) => {
     closeButtonText: {
       color: colors.text,
       fontWeight: '700',
+    },
+    themeSelector: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    themeButton: {
+      flex: 1,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+      backgroundColor: colors.card,
+    },
+    themeButtonActive: {
+      backgroundColor: colors.accent,
+      borderColor: colors.accent,
+    },
+    themeButtonText: {
+      color: colors.text,
+      fontWeight: '600',
+      fontSize: 12,
+    },
+    themeButtonTextActive: {
+      color: '#fff',
     },
   });
 };

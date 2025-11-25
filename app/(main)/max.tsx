@@ -1,6 +1,7 @@
 import { AuthContext } from "@/Context/AuthContext";
+import { Theme, useTheme } from "@/Context/ThemeContext";
 import { createClient } from '@supabase/supabase-js';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -31,6 +32,8 @@ type UserProfile = {
 
 export default function MaxScreen() {
   const { user, updateProfile } = useContext(AuthContext);
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -41,7 +44,6 @@ export default function MaxScreen() {
   const scrollRef = useRef<ScrollView | null>(null);
 
   const FREE_MESSAGE_LIMIT = 5; // Límite para usuarios FREE
-  const PRIMARY = '#FC3058';
 
 
   const supabaseUrl = "https://dzwkyykjnrcllgsqnrlg.supabase.co";
@@ -311,7 +313,7 @@ Responde de forma profesional pero cercana.`;
   if (loadingProfile) {
     return (
       <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color={PRIMARY} />
+        <ActivityIndicator size="large" color={theme.colors.accent} />
         <Text style={styles.loadingText}>Cargando tu perfil...</Text>
       </View>
     );
@@ -326,7 +328,7 @@ Responde de forma profesional pero cercana.`;
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: PRIMARY }]}>
+      <View style={styles.header}>
         <View>
           <Text style={styles.title}>M.A.X 💪</Text>
           <Text style={styles.subtitle}>Tu asistente de entrenamiento</Text>
@@ -371,7 +373,7 @@ Responde de forma profesional pero cercana.`;
 
         {loading && (
           <View style={[styles.messageBubble, styles.assistantBubble, styles.loadingBubble]}>
-            <ActivityIndicator size="small" color={PRIMARY} />
+            <ActivityIndicator size="small" color={theme.colors.accent} />
             <Text style={styles.loadingMessage}>M.A.X está pensando...</Text>
           </View>
         )}
@@ -406,153 +408,161 @@ Responde de forma profesional pero cercana.`;
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  centerContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    padding: 20,
-    paddingTop: 50,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 3,
-    elevation: 5,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#ffecec',
-    marginTop: 2,
-  },
-  clearBtn: {
-    padding: 10,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderRadius: 8,
-  },
-  clearBtnText: {
-    fontSize: 20,
-    color: '#fff'
-  },
-  limitBanner: {
-    display: 'none' // ocultado visualmente
-  },
-  limitBannerDanger: {
-    display: 'none'
-  },
-  limitText: {
-    fontSize: 13,
-    color: '#856404',
-    fontWeight: '600',
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
-  },
-  messagesContainer: {
-    flex: 1,
-  },
-  messagesContent: {
-    padding: 15,
-    paddingBottom: 20,
-  },
-  messageBubble: {
-    maxWidth: '80%',
-    padding: 12,
-    borderRadius: 16,
-    marginBottom: 12,
-  },
-  userBubble: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#FC3058',
-    borderBottomRightRadius: 4,
-  },
-  assistantBubble: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#fff',
-    borderBottomLeftRadius: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  loadingBubble: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 15,
-  },
-  messageText: {
-    fontSize: 15,
-    lineHeight: 22,
-  },
-  userText: {
-    color: '#fff',
-  },
-  assistantText: {
-    color: '#333',
-  },
-  timestamp: {
-    fontSize: 10,
-    color: '#999',
-    marginTop: 4,
-    alignSelf: 'flex-end',
-  },
-  timestampUser: {
-    color: '#ffecec',
-  },
-  loadingMessage: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 8,
-    fontStyle: 'italic',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    padding: 12,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    alignItems: 'flex-end',
-  },
-  input: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    fontSize: 15,
-    maxHeight: 140,
-    marginRight: 8,
-    color: '#333',
-  },
-  sendBtn: {
-    backgroundColor: '#FC3058',
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sendBtnDisabled: {
-    backgroundColor: '#ccc',
-  },
-  sendBtnText: {
-    fontSize: 20,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-});
+const createStyles = (theme: Theme) => {
+  const { colors } = theme;
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    centerContent: {
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    header: {
+      padding: 20,
+      paddingTop: 50,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: colors.accent,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.12,
+      shadowRadius: 3,
+      elevation: 5,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: '#fff',
+    },
+    subtitle: {
+      fontSize: 14,
+      color: '#ffecec',
+      marginTop: 2,
+    },
+    clearBtn: {
+      padding: 10,
+      backgroundColor: 'rgba(255,255,255,0.12)',
+      borderRadius: 8,
+    },
+    clearBtnText: {
+      fontSize: 20,
+      color: '#fff'
+    },
+    limitBanner: {
+      display: 'none'
+    },
+    limitBannerDanger: {
+      display: 'none'
+    },
+    limitText: {
+      fontSize: 13,
+      color: '#856404',
+      fontWeight: '600',
+    },
+    loadingText: {
+      marginTop: 10,
+      fontSize: 16,
+      color: colors.textSecondary,
+    },
+    messagesContainer: {
+      flex: 1,
+    },
+    messagesContent: {
+      padding: 15,
+      paddingBottom: 20,
+    },
+    messageBubble: {
+      maxWidth: '80%',
+      padding: 12,
+      borderRadius: 16,
+      marginBottom: 12,
+    },
+    userBubble: {
+      alignSelf: 'flex-end',
+      backgroundColor: colors.accent,
+      borderBottomRightRadius: 4,
+    },
+    assistantBubble: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.card,
+      borderBottomLeftRadius: 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+      shadowColor: theme.mode === 'light' ? '#000' : 'transparent',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: theme.mode === 'light' ? 0.06 : 0,
+      shadowRadius: 2,
+      elevation: theme.mode === 'light' ? 2 : 0,
+    },
+    loadingBubble: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 15,
+    },
+    messageText: {
+      fontSize: 15,
+      lineHeight: 22,
+    },
+    userText: {
+      color: '#fff',
+    },
+    assistantText: {
+      color: colors.text,
+    },
+    timestamp: {
+      fontSize: 10,
+      color: colors.textSecondary,
+      marginTop: 4,
+      alignSelf: 'flex-end',
+    },
+    timestampUser: {
+      color: '#ffecec',
+    },
+    loadingMessage: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginLeft: 8,
+      fontStyle: 'italic',
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      padding: 12,
+      backgroundColor: colors.card,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      alignItems: 'flex-end',
+    },
+    input: {
+      flex: 1,
+      backgroundColor: colors.input,
+      borderRadius: 20,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      fontSize: 15,
+      maxHeight: 140,
+      marginRight: 8,
+      color: colors.text,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    sendBtn: {
+      backgroundColor: colors.accent,
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    sendBtnDisabled: {
+      backgroundColor: colors.border,
+    },
+    sendBtnText: {
+      fontSize: 20,
+      color: '#fff',
+      fontWeight: 'bold',
+    },
+  });
+};

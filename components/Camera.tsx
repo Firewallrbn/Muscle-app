@@ -114,7 +114,7 @@ export default function Camera() {
       <>
         <View style={styles.buttonContainerStatic}>
           <TouchableOpacity style={styles.scanButton} onPress={() => setIsScanning(true)}>
-            <Text style={styles.scanButtonText}>Escanea el QR de una maquina para mas infoLabel</Text>
+            <Text style={styles.scanButtonText}>📷 Escanear QR</Text>
           </TouchableOpacity>
         </View>
 
@@ -291,20 +291,23 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   buttonContainerStatic: {
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignItems: 'flex-end',
   },
   scanButton: {
-    backgroundColor: '#0A84FF',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: '#FC3058',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   scanButtonText: {
     color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 12,
+    fontWeight: '600',
   },
 
   /* Modal de máquina */

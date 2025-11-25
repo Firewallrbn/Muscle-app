@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, SafeAreaView, StyleSheet, Text, View, FlatList } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { Theme, useTheme } from '@/Context/ThemeContext';
+import { RoutineExerciseDisplay } from '@/types';
 import { supabase } from '@/utils/Supabase';
 import { fetchRoutineDetails } from '@/utils/routines';
-import { RoutineExerciseDisplay } from '@/types';
-import { Theme, useTheme } from '@/Context/ThemeContext';
+import { useLocalSearchParams } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
 interface RoutineDetail {
   id: string;
@@ -132,7 +132,6 @@ export default function RoutineDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {

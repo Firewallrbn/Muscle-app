@@ -1,16 +1,17 @@
+import { Theme, useTheme } from '@/Context/ThemeContext';
 import { useNotifications } from '@/utils/Notifications';
 import {
-  TRAINING_STORAGE_KEY,
-  TRAINING_TYPES,
-  dateToString,
-  getTodayDateString,
-  loadTrainingMap,
-  saveTrainingMap,
+    TRAINING_STORAGE_KEY,
+    TRAINING_TYPES,
+    dateToString,
+    getTodayDateString,
+    loadTrainingMap,
+    saveTrainingMap,
 } from '@/utils/trainingTracker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 
@@ -117,6 +118,8 @@ const buildWeeklySummary = (map: Record<string, string>) => {
 };
 
 export default function MuscleScreen() {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [dateTypeMap, setDateTypeMap] = useState<Record<string, string>>({});
   const [selectedType, setSelectedType] = useState<string | null>('pierna');
   const [isLoading, setIsLoading] = useState(true);
@@ -420,7 +423,7 @@ export default function MuscleScreen() {
                   selected && styles.typeButtonSelected,
                   {
                     borderColor: t.color,
-                    backgroundColor: selected ? t.color + '20' : '#fff',
+                    backgroundColor: selected ? t.color + '30' : theme.colors.card,
                   },
                 ]}
                 onPress={() => setSelectedType(t.key)}
@@ -438,11 +441,21 @@ export default function MuscleScreen() {
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Calendario de entrenamientos</Text>
         <Calendar
+          key={theme.mode}
           markingType={'custom'}
           markedDates={buildMarkedDates(dateTypeMap)}
           onDayPress={onDayPress}
           theme={{
-            todayTextColor: '#222',
+            backgroundColor: theme.colors.card,
+            calendarBackground: theme.colors.card,
+            textSectionTitleColor: theme.colors.textSecondary,
+            selectedDayBackgroundColor: theme.colors.accent,
+            selectedDayTextColor: '#fff',
+            todayTextColor: theme.colors.accent,
+            dayTextColor: theme.colors.text,
+            textDisabledColor: theme.colors.textSecondary,
+            monthTextColor: theme.colors.text,
+            arrowColor: theme.colors.accent,
           }}
           style={styles.calendar}
         />
@@ -610,349 +623,366 @@ export default function MuscleScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 16,
-    backgroundColor: '#f7f7f7',
-  },
-  scrollContent: {
-    paddingTop: 24,
-    paddingBottom: 32,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#555',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  legendContainer: {
-    width: '100%',
-    marginBottom: 12,
-  },
-  legendScroll: {
-    alignItems: 'center',
-    paddingHorizontal: 4,
-  },
-  typeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginRight: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    backgroundColor: '#fff',
-  },
-  typeButtonSelected: {
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  colorDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    marginRight: 8,
-  },
-  typeLabel: {
-    fontSize: 13,
-    color: '#222',
-  },
-  typeLabelSelected: {
-    fontWeight: '600',
-    color: '#000',
-  },
-  calendar: {
-    width: '100%',
-    borderRadius: 8,
-    padding: 8,
-  },
-  helperText: {
-    marginTop: 8,
-    color: '#666',
-    fontSize: 12,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginBottom: 12,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 12,
-    marginHorizontal: 4,
-    borderWidth: 1,
-    borderColor: '#eee',
-  },
-  statLabel: {
-    color: '#666',
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  statValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111',
-  },
-  card: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#eee',
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  listTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 6,
-  },
-  emptyText: {
-    color: '#666',
-    paddingVertical: 8,
-  },
-  listItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  listInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  listDate: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  listType: {
-    fontSize: 12,
-    color: '#555',
-  },
-  listActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  actionButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 6,
-    backgroundColor: '#ddd',
-    marginLeft: 8,
-  },
-  actionText: {
-    color: '#222',
-    fontWeight: '600',
-  },
-  deleteButton: {
-    backgroundColor: '#c00',
-  },
-  weeklyRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
-  },
-  weeklyCount: {
-    fontWeight: '700',
-    color: '#222',
-  },
-  primaryButton: {
-    width: '100%',
-    backgroundColor: '#FC3058',
-    paddingVertical: 16,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginTop: 4,
-    marginBottom: 8,
-  },
-  primaryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-  },
-  secondaryButton: {
-    width: '100%',
-    backgroundColor: '#0A84FF',
-    paddingVertical: 16,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  secondaryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-  },
-  reminderModalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'flex-end',
-  },
-  reminderModalContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 32,
-    maxHeight: '85%',
-  },
-  reminderTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 24,
-    textAlign: 'center',
-  },
-  reminderSection: {
-    marginBottom: 24,
-  },
-  reminderLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 12,
-    color: '#111',
-  },
-  dateSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 16,
-  },
-  dateNavButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dateNavButtonText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#0A84FF',
-  },
-  selectedDate: {
-    fontSize: 16,
-    fontWeight: '600',
-    minWidth: 120,
-    textAlign: 'center',
-  },
-  timeSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  timeInput: {
-    borderWidth: 2,
-    borderColor: '#0A84FF',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
-  timeButton: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#0A84FF',
-    width: 40,
-    textAlign: 'center',
-  },
-  timeValueInput: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginVertical: 8,
-    width: 50,
-    textAlign: 'center',
-    color: '#000',
-  },
-  timeSeparator: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  checkboxSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-  },
-  checkbox: {
-    marginRight: 12,
-  },
-  checkboxBox: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: '#ddd',
-    borderRadius: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxBoxChecked: {
-    backgroundColor: '#0A84FF',
-    borderColor: '#0A84FF',
-  },
-  checkmark: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  checkboxLabel: {
-    fontSize: 14,
-    color: '#222',
-    flex: 1,
-  },
-  reminderButtonRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  reminderButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: '#f0f0f0',
-  },
-  cancelButtonText: {
-    color: '#222',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  saveButton: {
-    backgroundColor: '#0A84FF',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-});
+const createStyles = (theme: Theme) => {
+  const { colors } = theme;
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingHorizontal: 16,
+      backgroundColor: colors.background,
+    },
+    scrollContent: {
+      paddingTop: 50,
+      paddingBottom: 32,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: '700',
+      marginBottom: 8,
+      color: colors.text,
+    },
+    subtitle: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: 12,
+    },
+    legendContainer: {
+      width: '100%',
+      marginBottom: 12,
+    },
+    legendScroll: {
+      alignItems: 'center',
+      paddingHorizontal: 4,
+    },
+    typeButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      marginRight: 8,
+      borderRadius: 20,
+      borderWidth: 1,
+      backgroundColor: colors.card,
+    },
+    typeButtonSelected: {
+      shadowColor: theme.mode === 'light' ? '#000' : 'transparent',
+      shadowOpacity: theme.mode === 'light' ? 0.12 : 0,
+      shadowRadius: 4,
+      elevation: theme.mode === 'light' ? 2 : 0,
+    },
+    colorDot: {
+      width: 14,
+      height: 14,
+      borderRadius: 7,
+      marginRight: 8,
+    },
+    typeLabel: {
+      fontSize: 13,
+      color: colors.text,
+    },
+    typeLabelSelected: {
+      fontWeight: '600',
+      color: colors.text,
+    },
+    calendar: {
+      width: '100%',
+      borderRadius: 8,
+      padding: 8,
+    },
+    helperText: {
+      marginTop: 8,
+      color: colors.textSecondary,
+      fontSize: 12,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      width: '100%',
+      marginBottom: 12,
+    },
+    statCard: {
+      flex: 1,
+      backgroundColor: colors.card,
+      padding: 12,
+      borderRadius: 12,
+      marginHorizontal: 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    statLabel: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      marginBottom: 4,
+    },
+    statValue: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    card: {
+      width: '100%',
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      padding: 12,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    sectionTitle: {
+      fontSize: 16,
+      fontWeight: '700',
+      marginBottom: 8,
+      color: colors.text,
+    },
+    listTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      marginBottom: 6,
+      color: colors.text,
+    },
+    emptyText: {
+      color: colors.textSecondary,
+      paddingVertical: 8,
+    },
+    listItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 10,
+      paddingHorizontal: 6,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    listInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    listDate: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    listType: {
+      fontSize: 12,
+      color: colors.textSecondary,
+    },
+    listActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    actionButton: {
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 6,
+      backgroundColor: colors.border,
+      marginLeft: 8,
+    },
+    actionText: {
+      color: colors.text,
+      fontWeight: '600',
+    },
+    deleteButton: {
+      backgroundColor: colors.accent,
+    },
+    weeklyRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    weeklyCount: {
+      fontWeight: '700',
+      color: colors.text,
+    },
+    primaryButton: {
+      width: '100%',
+      backgroundColor: colors.accent,
+      paddingVertical: 16,
+      borderRadius: 14,
+      alignItems: 'center',
+      marginTop: 4,
+      marginBottom: 8,
+    },
+    primaryButtonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: '700',
+      letterSpacing: 0.3,
+    },
+    secondaryButton: {
+      width: '100%',
+      backgroundColor: colors.secondary,
+      paddingVertical: 16,
+      borderRadius: 14,
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    secondaryButtonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: '700',
+      letterSpacing: 0.3,
+    },
+    reminderModalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      justifyContent: 'flex-end',
+    },
+    reminderModalContent: {
+      backgroundColor: colors.card,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      paddingHorizontal: 20,
+      paddingTop: 24,
+      paddingBottom: 32,
+      maxHeight: '85%',
+    },
+    reminderTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      marginBottom: 24,
+      textAlign: 'center',
+      color: colors.text,
+    },
+    reminderSection: {
+      marginBottom: 24,
+    },
+    reminderLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      marginBottom: 12,
+      color: colors.text,
+    },
+    dateSelector: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 16,
+    },
+    dateNavButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: colors.input,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    dateNavButtonText: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.secondary,
+    },
+    selectedDate: {
+      fontSize: 16,
+      fontWeight: '600',
+      minWidth: 120,
+      textAlign: 'center',
+      color: colors.text,
+    },
+    timeSelector: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    timeInput: {
+      borderWidth: 2,
+      borderColor: colors.secondary,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      alignItems: 'center',
+      backgroundColor: colors.input,
+    },
+    timeButton: {
+      fontSize: 24,
+      fontWeight: '600',
+      color: colors.secondary,
+      width: 40,
+      textAlign: 'center',
+    },
+    timeValueInput: {
+      fontSize: 18,
+      fontWeight: '700',
+      marginVertical: 8,
+      width: 50,
+      textAlign: 'center',
+      color: colors.text,
+    },
+    timeSeparator: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    checkboxSection: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 24,
+      paddingHorizontal: 12,
+      paddingVertical: 12,
+      backgroundColor: colors.input,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    checkbox: {
+      marginRight: 12,
+    },
+    checkboxBox: {
+      width: 24,
+      height: 24,
+      borderWidth: 2,
+      borderColor: colors.border,
+      borderRadius: 6,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    checkboxBoxChecked: {
+      backgroundColor: colors.secondary,
+      borderColor: colors.secondary,
+    },
+    checkmark: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    checkboxLabel: {
+      fontSize: 14,
+      color: colors.text,
+      flex: 1,
+    },
+    reminderButtonRow: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    reminderButton: {
+      flex: 1,
+      paddingVertical: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    cancelButton: {
+      backgroundColor: colors.input,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    cancelButtonText: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    saveButton: {
+      backgroundColor: colors.secondary,
+    },
+    saveButtonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: '700',
+    },
+  });
+};

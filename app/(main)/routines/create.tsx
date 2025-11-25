@@ -1,10 +1,10 @@
-import React, { useContext, useEffect, useMemo } from 'react';
-import { Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { router } from 'expo-router';
-import { useRoutineBuilder } from '@/Context/RoutineBuilderContext';
 import { AuthContext } from '@/Context/AuthContext';
-import { TRAINING_TYPES } from '@/utils/trainingTracker';
+import { useRoutineBuilder } from '@/Context/RoutineBuilderContext';
 import { Theme, useTheme } from '@/Context/ThemeContext';
+import { TRAINING_TYPES } from '@/utils/trainingTracker';
+import { router } from 'expo-router';
+import { useContext, useEffect, useMemo } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function CreateRoutineScreen() {
   const { user } = useContext(AuthContext);
@@ -30,65 +30,77 @@ export default function CreateRoutineScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Nueva rutina</Text>
-      <Text style={styles.subtitle}>Asigna un nombre y una descripción breve.</Text>
-
-      <View style={styles.card}>
-        <Text style={styles.label}>Nombre</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Pierna explosiva"
-          placeholderTextColor={theme.colors.textSecondary}
-          value={name}
-          onChangeText={setName}
-        />
-
-        <Text style={[styles.label, { marginTop: 16 }]}>Tipo de rutina</Text>
-        <View style={styles.typeList}>
-          {TRAINING_TYPES.map((type) => {
-            const selected = trainingType === type.key;
-            return (
-              <TouchableOpacity
-                key={type.key}
-                style={[styles.typePill, selected && { borderColor: type.color, backgroundColor: `${type.color}20` }]}
-                onPress={() => setTrainingType(type.key)}
-              >
-                <View style={[styles.typeDot, { backgroundColor: type.color }]} />
-                <Text style={[styles.typeText, selected && { color: theme.colors.text, fontWeight: '700' }]}>{type.label}</Text>
-              </TouchableOpacity>
-            );
-          })}
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Nueva rutina</Text>
+          <Text style={styles.subtitle}>Asigna un nombre y una descripción breve.</Text>
         </View>
 
-        <Text style={[styles.label, { marginTop: 16 }]}>Descripción</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          placeholder="Notas o enfoque de la sesión"
-          placeholderTextColor={theme.colors.textSecondary}
-          value={description}
-          multiline
-          numberOfLines={4}
-          onChangeText={setDescription}
-        />
-      </View>
+        <View style={styles.card}>
+          <Text style={styles.label}>Nombre</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Pierna explosiva"
+            placeholderTextColor={theme.colors.textSecondary}
+            value={name}
+            onChangeText={setName}
+          />
 
-      <View style={styles.summaryCard}>
-        <Text style={styles.summaryTitle}>Ejercicios añadidos</Text>
-        <Text style={styles.summaryCount}>{exercises.length} seleccionado(s)</Text>
-        <TouchableOpacity onPress={() => router.push('/(main)/routines/parameters')} disabled={!exercises.length}>
-          <Text style={[styles.link, !exercises.length && styles.disabledText]}>Editar sets y reps</Text>
-        </TouchableOpacity>
-      </View>
+          <Text style={[styles.label, styles.labelSpacing]}>Tipo de rutina</Text>
+          <View style={styles.typeList}>
+            {TRAINING_TYPES.map((type) => {
+              const selected = trainingType === type.key;
+              return (
+                <TouchableOpacity
+                  key={type.key}
+                  style={[styles.typePill, selected && { borderColor: type.color, backgroundColor: `${type.color}20` }]}
+                  onPress={() => setTrainingType(type.key)}
+                >
+                  <View style={[styles.typeDot, { backgroundColor: type.color }]} />
+                  <Text style={[styles.typeText, selected && styles.typeTextSelected]}>{type.label}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
 
-      <TouchableOpacity style={styles.primaryButton} onPress={handleAddExercises}>
-        <Text style={styles.primaryText}>Agregar ejercicios</Text>
-      </TouchableOpacity>
+          <Text style={[styles.label, styles.labelSpacing]}>Descripción (opcional)</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Notas o enfoque de la sesión"
+            placeholderTextColor={theme.colors.textSecondary}
+            value={description}
+            multiline
+            numberOfLines={4}
+            onChangeText={setDescription}
+          />
+        </View>
 
-      <TouchableOpacity style={styles.secondaryButton} onPress={() => router.back()}>
-        <Text style={styles.secondaryText}>Cancelar</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
+        <View style={styles.summaryCard}>
+          <View style={styles.summaryHeader}>
+            <Text style={styles.summaryTitle}>Ejercicios añadidos</Text>
+            <View style={styles.countBadge}>
+              <Text style={styles.countText}>{exercises.length}</Text>
+            </View>
+          </View>
+          {exercises.length > 0 && (
+            <TouchableOpacity onPress={() => router.push('/(main)/routines/parameters')}>
+              <Text style={styles.link}>Editar sets y reps →</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.primaryButton} onPress={handleAddExercises}>
+            <Text style={styles.primaryText}>Agregar ejercicios</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.secondaryButton} onPress={() => router.back()}>
+            <Text style={styles.secondaryText}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -97,29 +109,40 @@ const createStyles = (theme: Theme) =>
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
-      paddingHorizontal: 20,
-      paddingTop: 60,
+    },
+    scrollContent: {
+      paddingHorizontal: 16,
+      paddingTop: 50,
+      paddingBottom: 40,
+    },
+    header: {
+      marginBottom: 20,
     },
     title: {
       color: theme.colors.text,
-      fontSize: 26,
+      fontSize: 24,
       fontWeight: '700',
-      marginBottom: 6,
     },
     subtitle: {
       color: theme.colors.textSecondary,
-      marginBottom: 20,
+      marginTop: 4,
     },
     card: {
       backgroundColor: theme.colors.card,
-      borderRadius: 16,
+      borderRadius: 14,
       padding: 16,
       borderWidth: 1,
       borderColor: theme.colors.border,
+      marginBottom: 16,
     },
     label: {
       color: theme.colors.textSecondary,
-      marginBottom: 6,
+      fontSize: 13,
+      fontWeight: '600',
+      marginBottom: 8,
+    },
+    labelSpacing: {
+      marginTop: 20,
     },
     typeList: {
       flexDirection: 'row',
@@ -130,9 +153,9 @@ const createStyles = (theme: Theme) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      backgroundColor: theme.colors.card,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+      backgroundColor: theme.colors.input,
       borderRadius: 12,
       borderWidth: 1,
       borderColor: theme.colors.border,
@@ -144,46 +167,67 @@ const createStyles = (theme: Theme) =>
     },
     typeText: {
       color: theme.colors.textSecondary,
+      fontSize: 14,
+    },
+    typeTextSelected: {
+      color: theme.colors.text,
+      fontWeight: '700',
     },
     input: {
       backgroundColor: theme.colors.input,
       color: theme.colors.text,
       borderRadius: 12,
-      padding: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: 16,
       borderWidth: 1,
       borderColor: theme.colors.border,
     },
     textArea: {
-      height: 100,
+      height: 90,
       textAlignVertical: 'top',
+      paddingTop: 12,
     },
     summaryCard: {
       backgroundColor: theme.colors.card,
-      borderRadius: 16,
+      borderRadius: 14,
       padding: 16,
-      marginTop: 20,
       borderWidth: 1,
       borderColor: theme.colors.border,
+      marginBottom: 24,
+    },
+    summaryHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
     },
     summaryTitle: {
       color: theme.colors.text,
+      fontSize: 16,
       fontWeight: '700',
-      marginBottom: 4,
     },
-    summaryCount: {
-      color: theme.colors.textSecondary,
+    countBadge: {
+      backgroundColor: theme.colors.accent,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
+    countText: {
+      color: '#fff',
+      fontWeight: '700',
+      fontSize: 14,
     },
     link: {
       color: theme.colors.accent,
-      marginTop: 8,
+      marginTop: 12,
+      fontWeight: '600',
     },
-    disabledText: {
-      color: theme.colors.textSecondary,
+    buttonContainer: {
+      gap: 12,
     },
     primaryButton: {
-      marginTop: 30,
       backgroundColor: theme.colors.accent,
-      paddingVertical: 14,
+      paddingVertical: 16,
       borderRadius: 14,
       alignItems: 'center',
     },
@@ -193,11 +237,16 @@ const createStyles = (theme: Theme) =>
       fontWeight: '700',
     },
     secondaryButton: {
-      marginTop: 12,
-      paddingVertical: 12,
+      backgroundColor: theme.colors.card,
+      paddingVertical: 14,
+      borderRadius: 14,
       alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
     },
     secondaryText: {
-      color: theme.colors.textSecondary,
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: '600',
     },
   });

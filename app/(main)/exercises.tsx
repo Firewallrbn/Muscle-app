@@ -185,7 +185,9 @@ const handleToggleFavorite = useCallback(
                             }
                         }}
                     >
-                        <Text style={styles.favButtonText}>{showFavorites ? 'Showing favorites' : 'Show favorites'}</Text>
+                        <Text style={[styles.favButtonText, showFavorites && styles.favButtonTextActive]}>
+                            {showFavorites ? 'Showing favorites' : 'Show favorites'}
+                        </Text>
                     </TouchableOpacity>
                 </View>
                 {error && exercises.length > 0 && (
@@ -269,21 +271,22 @@ const createStyles = (theme: ReturnType<typeof useTheme>['theme']) => {
             marginBottom: 16,
         },
         searchContainer: {
-            backgroundColor: colors.input,
+            backgroundColor: theme.mode === 'light' ? '#FFFFFF' : colors.card,
             borderRadius: 14,
             paddingHorizontal: 16,
             paddingVertical: 12,
             shadowColor: theme.mode === 'light' ? '#000' : 'transparent',
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: theme.mode === 'light' ? 0.08 : 0,
-            shadowRadius: 12,
-            elevation: theme.mode === 'light' ? 3 : 0,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: theme.mode === 'light' ? 0.06 : 0,
+            shadowRadius: 8,
+            elevation: theme.mode === 'light' ? 2 : 0,
             borderWidth: 1,
             borderColor: colors.border,
         },
         searchInput: {
             fontSize: 16,
             color: colors.text,
+            backgroundColor: 'transparent',
         },
         categoriesContainer: {
             marginTop: 12,
@@ -337,8 +340,11 @@ const createStyles = (theme: ReturnType<typeof useTheme>['theme']) => {
             borderColor: colors.accent,
         },
         favButtonText: {
-            color: theme.mode === 'light' ? '#ffffff' : colors.text,
+            color: colors.text,
             fontWeight: '700',
+        },
+        favButtonTextActive: {
+            color: '#fff',
         },
         filterRow: {
             flexDirection: 'row',

@@ -1,9 +1,9 @@
-import React, { useCallback, useContext, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Link, router, useFocusEffect } from 'expo-router';
 import { AuthContext } from '@/Context/AuthContext';
 import { Theme, useTheme } from '@/Context/ThemeContext';
 import { fetchUserRoutines, Routine } from '@/utils/routines';
+import { Link, router, useFocusEffect } from 'expo-router';
+import { useCallback, useContext, useMemo, useState } from 'react';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function RoutinesScreen() {
   const { user } = useContext(AuthContext);
@@ -79,6 +79,7 @@ export default function RoutinesScreen() {
           data={routines}
           keyExtractor={(item) => item.id}
           renderItem={renderRoutine}
+          contentContainerStyle={styles.listContent}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={() => (
             <View style={styles.centered}> 
@@ -100,13 +101,13 @@ const createStyles = (theme: Theme) =>
       flex: 1,
       backgroundColor: theme.colors.background,
       paddingHorizontal: 16,
-      paddingTop: 50,
     },
     header: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: 20,
+      paddingTop: 50,
+      paddingBottom: 20,
     },
     title: {
       color: theme.colors.text,
@@ -131,20 +132,25 @@ const createStyles = (theme: Theme) =>
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+      paddingHorizontal: 20,
     },
     errorText: {
       color: theme.colors.accent,
       marginBottom: 8,
+      textAlign: 'center',
     },
     retryText: {
       color: theme.colors.accent,
+      fontWeight: '600',
     },
     emptyText: {
       color: theme.colors.textSecondary,
+      textAlign: 'center',
     },
     linkText: {
       color: theme.colors.accent,
-      marginTop: 8,
+      marginTop: 12,
+      fontWeight: '600',
     },
     card: {
       backgroundColor: theme.colors.card,
@@ -164,6 +170,7 @@ const createStyles = (theme: Theme) =>
       color: theme.colors.text,
       fontSize: 18,
       fontWeight: '700',
+      flex: 1,
     },
     cardDate: {
       color: theme.colors.textSecondary,
@@ -172,5 +179,8 @@ const createStyles = (theme: Theme) =>
     cardDescription: {
       color: theme.colors.textSecondary,
       marginTop: 4,
+    },
+    listContent: {
+      paddingBottom: 32,
     },
   });
