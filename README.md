@@ -10,7 +10,7 @@ Muscle App is a mobile fitness application built with React Native and Expo. It 
 - Routine creation
 - Workout session tracking
 - Progress charts
-- AI Assistant (OpenAI Llama 3)
+- AI Assistant (Gemini)
 - Local caching with AsyncStorage
 
 ### 2.2 Technical Features
@@ -23,7 +23,7 @@ Muscle App is a mobile fitness application built with React Native and Expo. It 
 - Frontend: React Native + Expo
 - Backend: Supabase (Authentication, Database)
 - External API: ExerciseDB (RapidAPI)
-- AI: OpenAI Llama 3
+- AI: Gemini
 - Local Storage: AsyncStorage
 - State Management: Context API
 
@@ -31,7 +31,7 @@ Muscle App is a mobile fitness application built with React Native and Expo. It 
 - React Native
 - Expo
 - Supabase
-- OpenAI API
+- Gemini API
 - RapidAPI ExerciseDB
 - React Navigation
 - React Native Chart Kit
@@ -42,30 +42,18 @@ Muscle App is a mobile fitness application built with React Native and Expo. It 
 ### 5.1 Clone Repository
 git clone https://github.com/Firewallrbn/Muscle-app
 
-shell
-Copiar código
-
 ### 5.2 Install Dependencies
 npm install
-
-bash
-Copiar código
 
 ### 5.3 Environment Variables
 Create a `.env` file:
 EXPO_PUBLIC_SUPABASE_URL=
 EXPO_PUBLIC_SUPABASE_ANON_KEY=
 EXPO_PUBLIC_RAPIDAPI_KEY=
-OPENAI_API_KEY=
-
-shell
-Copiar código
+GEMINI_API_KEY=
 
 ### 5.4 Run Application
 npx expo start
-
-shell
-Copiar código
 
 ## 6. Folder Structure
 /app
@@ -80,5 +68,3 @@ Copiar código
 Full documentation available in GitHub Wiki:
 https://github.com/Firewallrbn/Muscle-app/wiki
 
-## 8. License
-MIT License
