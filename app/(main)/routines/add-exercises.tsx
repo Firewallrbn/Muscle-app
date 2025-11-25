@@ -84,7 +84,7 @@ export default function AddExercisesScreen() {
         <TouchableOpacity style={styles.outlineButton} onPress={() => router.back()}>
           <Text style={styles.outlineText}>Volver</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.primaryButton} onPress={() => router.push('/(tabs)/routines/parameters')}>
+        <TouchableOpacity style={styles.primaryButton} onPress={() => router.push('/(main)/routines/parameters')}>
           <Text style={styles.primaryText}>Continuar</Text>
         </TouchableOpacity>
       </View>

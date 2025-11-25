@@ -42,7 +42,7 @@ export default function RoutineParametersScreen() {
       }
       Alert.alert('Rutina guardada', 'Tu rutina fue creada con éxito.');
       reset();
-      router.replace(`/(tabs)/routines/${routineId}`);
+      router.replace(`/(main)/routines/${routineId}`);
     } catch (err) {
       console.error('Routine creation error', err);
       Alert.alert('Error', 'No pudimos guardar tu rutina. Intenta nuevamente.');

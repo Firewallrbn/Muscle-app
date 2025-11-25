@@ -46,16 +46,6 @@ export default function MainLayout() {
       />
 
       <Tabs.Screen
-        name="start-workout"
-        options={{
-          title: "Start Workout",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "play" : "play-outline"} size={24} color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
         name="max"
         options={{
           title: "M.A.X",

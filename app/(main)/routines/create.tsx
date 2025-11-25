@@ -21,7 +21,7 @@ export default function CreateRoutineScreen() {
       Alert.alert('Nombre requerido', 'Asigna un nombre a tu rutina antes de continuar.');
       return;
     }
-    router.push('/(tabs)/routines/add-exercises');
+    router.push('/(main)/routines/add-exercises');
   };
 
   return (
@@ -54,7 +54,7 @@ export default function CreateRoutineScreen() {
       <View style={styles.summaryCard}>
         <Text style={styles.summaryTitle}>Ejercicios añadidos</Text>
         <Text style={styles.summaryCount}>{exercises.length} seleccionado(s)</Text>
-        <TouchableOpacity onPress={() => router.push('/(tabs)/routines/parameters')} disabled={!exercises.length}>
+        <TouchableOpacity onPress={() => router.push('/(main)/routines/parameters')} disabled={!exercises.length}>
           <Text style={[styles.link, !exercises.length && styles.disabledText]}>Editar sets y reps</Text>
         </TouchableOpacity>
       </View>
