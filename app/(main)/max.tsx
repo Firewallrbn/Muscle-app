@@ -216,7 +216,8 @@ INSTRUCCIONES:
 - Si faltan datos relevantes (altura, edad, etc.), indica qué información falta y sugiere preguntas para obtenerla.
 - Si te preguntan sobre rutinas, incluye ejercicios específicos con series, repeticiones y descansos adecuados.
 - Sé claro, conciso pero completo.
-- Usa emojis ocasionalmente para ser más amigable.
+- No uses muchos emojis, solo unos pocos para enfatizar.
+- No respondas en formato markdown, sólo texto plano.
 - Si es necesario, divide las respuestas en secciones con títulos claros.
 - Siempre motiva al usuario de forma positiva.
 

@@ -4,7 +4,7 @@ import { supabase } from "./Supabase";
 const API_BASE_URL = "https://exercisedb.p.rapidapi.com";
 
 const getApiKey = () => {
-  const apiKey = "112d73487fmshe91ccfabdca7b08p1a9b1ejsnebe43c1e4234";
+  const apiKey = "7bef2ba3b5mshcbc24c43f38da88p15b065jsn2bea43ab6482";
   if (!apiKey) {
     throw new Error("RapidAPI key is not configured.");
   }
@@ -92,7 +92,7 @@ export const fetchExerciseById = async (exerciseId: string): Promise<Exercise> =
     console.log('Fetching from API with ID:', normalizedId);
 
     const response = await fetch(
-      `${API_BASE_URL}/exercises/exerciseId/${normalizedId}`,
+      `${API_BASE_URL}/exercises/exercise/${normalizedId}`,
       {
         headers: buildHeaders(),
       }
