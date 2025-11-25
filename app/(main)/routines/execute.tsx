@@ -1,16 +1,17 @@
 import { AuthContext } from '@/Context/AuthContext';
+import { useTheme } from '@/Context/ThemeContext';
 import { supabase } from '@/utils/Supabase';
 import { denormalizeExerciseId, fetchExerciseById } from '@/utils/exerciseApi';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface ExerciseSet {
@@ -35,6 +36,8 @@ interface ExecutionState {
 export default function ExecuteRoutineScreen() {
   const { id } = useLocalSearchParams();
   const { user } = useContext(AuthContext);
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   const [exercises, setExercises] = useState<ExerciseSet[]>([]);
   const [loading, setLoading] = useState(true);
   const [execution, setExecution] = useState<ExecutionState>({
@@ -192,7 +195,7 @@ export default function ExecuteRoutineScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#FC3058" />
+        <ActivityIndicator size="large" color={theme.colors.accent} />
       </SafeAreaView>
     );
   }
@@ -309,188 +312,189 @@ export default function ExecuteRoutineScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0E0E10',
-    paddingHorizontal: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-    gap: 12,
-  },
-  backButton: {
-    color: '#FC3058',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  progressContainer: {
-    flex: 1,
-    height: 8,
-    backgroundColor: '#2A2A2C',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    height: '100%',
-    backgroundColor: '#FC3058',
-  },
-  progressText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '700',
-    minWidth: 40,
-    textAlign: 'right',
-  },
+const createStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      paddingHorizontal: 16,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 24,
+      gap: 12,
+    },
+    backButton: {
+      color: theme.colors.accent,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    progressContainer: {
+      flex: 1,
+      height: 8,
+      backgroundColor: theme.colors.input,
+      borderRadius: 4,
+      overflow: 'hidden',
+    },
+    progressBar: {
+      height: '100%',
+      backgroundColor: theme.colors.accent,
+    },
+    progressText: {
+      color: theme.colors.text,
+      fontSize: 14,
+      fontWeight: '700',
+      minWidth: 40,
+      textAlign: 'right',
+    },
 
-  /* Pantalla de ejercicio */
-  exerciseContainer: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  exerciseCard: {
-    backgroundColor: '#1C1C1E',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-  },
-  exerciseName: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 6,
-  },
-  bodyPart: {
-    color: '#8C8B91',
-    fontSize: 14,
-    marginBottom: 20,
-  },
-  seriesInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#2A2A2C',
-    borderRadius: 12,
-    paddingVertical: 16,
-    marginBottom: 16,
-  },
-  seriesBox: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  seriesLabel: {
-    color: '#8C8B91',
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 6,
-  },
-  seriesValue: {
-    color: '#FC3058',
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  divider: {
-    width: 1,
-    height: 40,
-    backgroundColor: '#3A3A3C',
-  },
-  notesContainer: {
-    backgroundColor: '#2A2A2C',
-    borderRadius: 12,
-    padding: 12,
-  },
-  notesLabel: {
-    color: '#8C8B91',
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 6,
-  },
-  notesText: {
-    color: '#fff',
-    fontSize: 14,
-    lineHeight: 20,
-  },
+    /* Pantalla de ejercicio */
+    exerciseContainer: {
+      flex: 1,
+      justifyContent: 'space-between',
+    },
+    exerciseCard: {
+      backgroundColor: theme.colors.card,
+      borderRadius: 16,
+      padding: 20,
+      marginBottom: 20,
+    },
+    exerciseName: {
+      color: theme.colors.text,
+      fontSize: 24,
+      fontWeight: '700',
+      marginBottom: 6,
+    },
+    bodyPart: {
+      color: theme.colors.textSecondary,
+      fontSize: 14,
+      marginBottom: 20,
+    },
+    seriesInfo: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      backgroundColor: theme.colors.input,
+      borderRadius: 12,
+      paddingVertical: 16,
+      marginBottom: 16,
+    },
+    seriesBox: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    seriesLabel: {
+      color: theme.colors.textSecondary,
+      fontSize: 12,
+      fontWeight: '600',
+      marginBottom: 6,
+    },
+    seriesValue: {
+      color: theme.colors.accent,
+      fontSize: 20,
+      fontWeight: '700',
+    },
+    divider: {
+      width: 1,
+      height: 40,
+      backgroundColor: theme.colors.border,
+    },
+    notesContainer: {
+      backgroundColor: theme.colors.input,
+      borderRadius: 12,
+      padding: 12,
+    },
+    notesLabel: {
+      color: theme.colors.textSecondary,
+      fontSize: 12,
+      fontWeight: '600',
+      marginBottom: 6,
+    },
+    notesText: {
+      color: theme.colors.text,
+      fontSize: 14,
+      lineHeight: 20,
+    },
 
-  actionButtonsContainer: {
-    gap: 12,
-    marginBottom: 20,
-  },
-  skipExerciseButton: {
-    backgroundColor: '#2A2A2C',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#3A3A3C',
-  },
-  skipExerciseButtonText: {
-    color: '#8C8B91',
-    fontWeight: '700',
-  },
-  completeButton: {
-    backgroundColor: '#FC3058',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  completeButtonText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 16,
-  },
+    actionButtonsContainer: {
+      gap: 12,
+      marginBottom: 20,
+    },
+    skipExerciseButton: {
+      backgroundColor: theme.colors.input,
+      paddingVertical: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    skipExerciseButtonText: {
+      color: theme.colors.textSecondary,
+      fontWeight: '700',
+    },
+    completeButton: {
+      backgroundColor: theme.colors.accent,
+      paddingVertical: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    completeButtonText: {
+      color: '#fff',
+      fontWeight: '700',
+      fontSize: 16,
+    },
 
-  /* Pantalla de descanso */
-  restContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  restTitle: {
-    color: '#fff',
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  nextExerciseText: {
-    color: '#8C8B91',
-    fontSize: 16,
-    marginBottom: 40,
-  },
-  timerContainer: {
-    backgroundColor: '#1C1C1E',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 40,
-    borderWidth: 3,
-    borderColor: '#FC3058',
-  },
-  timerText: {
-    color: '#FC3058',
-    fontSize: 48,
-    fontWeight: '700',
-  },
-  restButtonContainer: {
-    width: '100%',
-  },
-  skipButton: {
-    backgroundColor: '#2A2A2C',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  skipButtonText: {
-    color: '#8C8B91',
-    fontWeight: '700',
-  },
+    /* Pantalla de descanso */
+    restContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    restTitle: {
+      color: theme.colors.text,
+      fontSize: 28,
+      fontWeight: '700',
+      marginBottom: 12,
+    },
+    nextExerciseText: {
+      color: theme.colors.textSecondary,
+      fontSize: 16,
+      marginBottom: 40,
+    },
+    timerContainer: {
+      backgroundColor: theme.colors.card,
+      width: 200,
+      height: 200,
+      borderRadius: 100,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 40,
+      borderWidth: 3,
+      borderColor: theme.colors.accent,
+    },
+    timerText: {
+      color: theme.colors.accent,
+      fontSize: 48,
+      fontWeight: '700',
+    },
+    restButtonContainer: {
+      width: '100%',
+    },
+    skipButton: {
+      backgroundColor: theme.colors.input,
+      paddingVertical: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    skipButtonText: {
+      color: theme.colors.textSecondary,
+      fontWeight: '700',
+    },
 
-  emptyText: {
-    color: '#8C8B91',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-});
+    emptyText: {
+      color: theme.colors.textSecondary,
+      textAlign: 'center',
+      marginTop: 20,
+    },
+  });

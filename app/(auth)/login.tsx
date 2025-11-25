@@ -134,7 +134,7 @@ const createStyles = (theme: Theme) =>
     title: {
       fontSize: 42,
       fontWeight: '800',
-      color: '#FFFFFF',
+      color: theme.mode === 'dark' ? '#FFFFFF' : '#111111',
       letterSpacing: 3,
     },
     subtitle: {
